@@ -70,9 +70,7 @@ void playerTurn() {
 
     allocateMoves(moves);
 
-    generatePlayerMoves(moves);
-    if (PLAYER_MOVES_LEFT == 0)
-        gameOver(PLAYER, REASON_NO_MOVES_LEFT);
+    PLAYER_MOVES_LEFT = generatePlayerMoves(moves);
     printMoves(moves, PLAYER_MOVES_LEFT);
 
     do {
@@ -106,23 +104,23 @@ void playerTurn() {
 
 void computerTurn() {
     printf("Just thinking..\n");
-    Move *move = miniMax();
+    Move move = miniMax();
     // print computer move
     std::cout << "My move is "
-              << (char) (move->move[1] + 'A')
-              << BOARD_ROWS - move->move[0]
-              << (char) (move->move[3] + 'A')
-              << BOARD_COLS - move->move[2]
+              << (char) (move.move[1] + 'A')
+              << move.move[0] + BOARD_ROWS
+              << (char) (move.move[3] + 'A')
+              << BOARD_ROWS - move.move[2]
               << "("
-              << (char) (move->move[1] + 'A')
-              << 9 - (BOARD_ROWS - move->move[0])
-              << (char) (move->move[3] + 'A')
-              << 9 - (BOARD_COLS - move->move[2])
+              << (char) (move.move[1] + 'A')
+              << 7 - (BOARD_ROWS + move.move[0])
+              << (char) (move.move[3] + 'A')
+              << 7 - (BOARD_ROWS - move.move[2])
               << ")" << std::endl;
 
 
     // computer move
-    movePiece(move, DONT_UNDO);
+    movePiece(&move, DONT_UNDO);
     // display board
     displayBoard();
 }
@@ -217,13 +215,13 @@ void allocateMoves(Move *moves[50]) {
     }
 }
 
-Move *miniMax() {
+Move miniMax() {
     Move *computer_moves[MAX_MOVES];
-    Move *bestMove;
+    Move bestMove;
     allocateMoves(computer_moves);
 
     COMPUTER_MOVES_LEFT = generateComputerMoves(computer_moves);
-    bestMove = computer_moves[0];
+    bestMove = *computer_moves[0];
 
     deallocateMoves(computer_moves);
     return bestMove;
@@ -350,23 +348,22 @@ int generatePlayerMoves(Move **moves) {
 }
 
 int generateComputerMoves(Move **moves) {
-    int i, j;
     // keeps track of number of moves
     // and the current index for moves
     int numberOfMoves = 0;
-    for (i = 0; i < BOARD_ROWS; i++) {
-        for (j = 0; j < BOARD_COLS; j++) {
+    for (int i = 0; i < BOARD_ROWS; i++) {
+        for (int j = 0; j < BOARD_COLS; j++) {
             switch (b[i][j]) {
-                case 'P':
+                case PAWN_C:
                     numberOfMoves = generatePawnMoves(moves, numberOfMoves, false, i, j);
                     break;
-                case 'K':
+                case KING_C:
                     numberOfMoves = generateKingMoves(moves, numberOfMoves, false, i, j);
                     break;
-                case 'H':
+                case HORSE_C:
                     numberOfMoves = generateHorseMoves(moves, numberOfMoves, false, i, j);
                     break;
-                case 'B':
+                case BISHOP_C:
                     numberOfMoves = generateBishopMoves(moves, numberOfMoves, false, i, j);
                     break;
                 default:

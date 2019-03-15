@@ -27,8 +27,8 @@ const int BISHOP_MIN = -1;
 
 int PLAYER_KINGS;
 int COMPUTER_KINGS;
-int PLAYER_MOVES_LEFT;
-int COMPUTER_MOVES_LEFT;
+int PLAYER_MOVES_LEFT = 1;
+int COMPUTER_MOVES_LEFT = 1;
 
 const int BOARD_ROWS = 6;
 const int BOARD_COLS = 8;
@@ -89,7 +89,7 @@ void allocateMoves(Move *moves[50]);
 
 void deallocateMoves(Move *moves[50]);
 
-Move *miniMax();
+Move miniMax();
 
 // Board
 void displayBoard();
