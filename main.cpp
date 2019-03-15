@@ -14,27 +14,27 @@ void setup() {
             b[i][j] = '-';
     }
 
-//    b[5][0] = HORSE_P;
-//    b[5][1] = HORSE_P;
-//    b[5][3] = KING_P;
-//    b[5][4] = KING_P;
-//    b[5][6] = BISHOP_P;
-//    b[5][7] = BISHOP_P;
-//
-//    b[4][1] = PAWN_P;
-//    b[4][2] = PAWN_P;
-//    b[4][3] = PAWN_P;
-//    b[4][4] = PAWN_P;
-//    b[4][5] = PAWN_P;
-//    b[4][6] = PAWN_P;
-//
-//    b[0][0] = HORSE_C;
-//    b[0][1] = HORSE_C;
-//    b[0][3] = KING_C;
-//    b[0][4] = KING_C;
-//    b[0][6] = BISHOP_C;
-//    b[0][7] = BISHOP_C;
-//
+    b[5][0] = HORSE_P;
+    b[5][1] = HORSE_P;
+    b[5][3] = KING_P;
+    b[5][4] = KING_P;
+    b[5][6] = BISHOP_P;
+    b[5][7] = BISHOP_P;
+
+    b[4][1] = PAWN_P;
+    b[4][2] = PAWN_P;
+    b[4][3] = PAWN_P;
+    b[4][4] = PAWN_P;
+    b[4][5] = PAWN_P;
+    b[4][6] = PAWN_P;
+
+    b[0][0] = HORSE_C;
+    b[0][1] = HORSE_C;
+    b[0][3] = KING_C;
+    b[0][4] = KING_C;
+    b[0][6] = BISHOP_C;
+    b[0][7] = BISHOP_C;
+
     b[1][1] = PAWN_C;
     b[1][2] = PAWN_C;
     b[1][3] = PAWN_C;
@@ -42,7 +42,6 @@ void setup() {
     b[1][5] = PAWN_C;
     b[1][6] = PAWN_C;
 
-    b[3][3] = HORSE_P;
 }
 
 void play() {
@@ -167,6 +166,8 @@ bool isValidMove(Move **moves, Move *playerMove) {
             moves[i]->move[3] == playerMove->move[3]) {
             playerMove->capture = moves[i]->capture;
             playerMove->pieceCaptured = moves[i]->pieceCaptured;
+            playerMove->shouldChange = moves[i]->shouldChange;
+            playerMove->newIdentity = moves[i]->newIdentity;
             legalMove = true;
             break;
         }
@@ -256,20 +257,9 @@ void movePiece(Move *move, bool undo) {
         b[move->move[2]][move->move[3]] = temp;
         if (move->capture)
             b[move->move[0]][move->move[1]] = '-';
+        if(move->shouldChange)
+            b[move->move[2]][move->move[3]] = move->newIdentity;
     }
-    //if should change identity
-    // temp = current identity
-    // current = new identity
-    // new identity = temp
-    std::cout << move->move[0] << move->move[1] << move->move[2] << move->move[3] << std::endl;
-    if(move->shouldChange){
-        std::cout << "change please" << std::endl;
-        temp = b[move->move[0]][move->move[1]];
-        b[move->move[0]][move->move[1]] = move->newIdentity;
-        move->newIdentity = temp;
-    }
-    else
-        std::cout << "why no change" << std::endl;
 }
 
 void displayBoard() {
