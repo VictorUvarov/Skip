@@ -256,49 +256,54 @@ void movePiece(Move *move, bool undo) {
 
 void displayBoard() {
     if(IS_COMPUTER_TURN)
-        std::cout << "\n   \033[31;1;1m-----------------------  Computer\033[0m\n";
+        std::cout << "\n  \033[31;1;1m--------------------------------  Computer\033[0m\n";
     else
-        std::cout << "\n   -----------------------  Computer\n";
+        std::cout << "\n  --------------------------------  Computer\n";
     for (int i = 0; i < BOARD_ROWS; i++) {
         std::cout << BOARD_ROWS - i << " ";
         for (int j = 0; j < BOARD_COLS; j++) {
+            if((i + j) % 2 == 0)
+                std::cout << "\033[48;5;57m";
+
             switch (b[i][j]) {
                 case KING_P:
-                    std::cout << " " << KING_UNI_P << " ";
+                    std::cout << " " << KING_UNI_P << "  ";
                     break;
                 case HORSE_P:
-                    std::cout << " " << HORSE_UNI_P << " ";
+                    std::cout << " " << HORSE_UNI_P << "  ";
                     break;
                 case BISHOP_P:
-                    std::cout << " " << BISHOP_UNI_P << " ";
+                    std::cout << " " << BISHOP_UNI_P << "  ";
                     break;
                 case PAWN_P:
-                    std::cout << " " << PAWN_UNI_P << " ";
+                    std::cout << " " << PAWN_UNI_P << "  ";
                     break;
                 case KING_C:
-                    std::cout << " " << KING_UNI_C << " ";
+                    std::cout << " " << KING_UNI_C << "  ";
                     break;
                 case BISHOP_C:
-                    std::cout << " " << BISHOP_UNI_C << " ";
+                    std::cout << " " << BISHOP_UNI_C << "  ";
                     break;
                 case HORSE_C:
-                    std::cout << " " << HORSE_UNI_C << " ";
+                    std::cout << " " << HORSE_UNI_C << "  ";
                     break;
                 case PAWN_C:
-                    std::cout << " " << PAWN_UNI_C << " ";
+                    std::cout << " " << PAWN_UNI_C << "  ";
                     break;
                 default:
-                    std::cout << " " << DOT << " ";
+                    std::cout << " " << DOT << "  ";
             }
+            std::cout << "\033[0m";
+
         }
-        std::cout << " " << std::endl;
+        std::cout << std::endl;
 
     }
-    std::cout << "   A  B  C  D  E  F  G  H\n";
+    std::cout << "   A   B   C   D   E   F   G   H\n";
     if(IS_PLAYER_TURN)
-        std::cout << "   \033[34;1;1m-----------------------  Human\033[0m\n";
+        std::cout << "  \033[34;1;1m--------------------------------  Human\033[0m\n";
     else
-        std::cout << "   -----------------------  Human\n";
+        std::cout << "  --------------------------------  Human\n";
 }
 
 bool moveInBounds(int row, int col) {
