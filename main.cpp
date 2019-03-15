@@ -564,10 +564,7 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[2] = row - 1;
             moves[index]->move[3] = col - 2;
             moves[index]->pieceCaptured = b[row - 1][col - 2];
-            if (isupper(b[row - 1][col - 2]))
-                moves[index]->capture = true;
-            else
-                moves[index]->capture = false;
+            moves[index]->capture = isupper(b[row - 1][col - 2]) != 0;
             index++;
         }
         // 2 right 1 up (col + 2, row - 1)
@@ -578,10 +575,7 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[2] = row - 1;
             moves[index]->move[3] = col + 2;
             moves[index]->pieceCaptured = b[row - 1][col + 2];
-            if (isupper(b[row - 1][col + 2]))
-                moves[index]->capture = true;
-            else
-                moves[index]->capture = false;
+            moves[index]->capture = isupper(b[row - 1][col + 2]) != 0;
             index++;
         }
         // 1 left 2 up ( col - 1, row - 2)
@@ -592,10 +586,7 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[2] = row - 2;
             moves[index]->move[3] = col - 1;
             moves[index]->pieceCaptured = b[row - 2][col - 1];
-            if (isupper(b[row - 2][col - 1]))
-                moves[index]->capture = true;
-            else
-                moves[index]->capture = false;
+            moves[index]->capture = isupper(b[row - 2][col - 1]) != 0;
             index++;
         }
         // 1 right 2 up ( col + 1, row - 2)
@@ -606,10 +597,7 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[2] = row - 2;
             moves[index]->move[3] = col + 1;
             moves[index]->pieceCaptured = b[row - 2][col + 1];
-            if (isupper(b[row - 2][col + 1]))
-                moves[index]->capture = true;
-            else
-                moves[index]->capture = false;
+            moves[index]->capture = isupper(b[row - 2][col + 1]) != 0;
             index++;
         }
         // if senior backwards capture
@@ -671,10 +659,7 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[2] = row + 1;
             moves[index]->move[3] = col - 2;
             moves[index]->pieceCaptured = b[row + 1][col - 2];
-            if (islower(b[row + 1][col - 2]))
-                moves[index]->capture = true;
-            else
-                moves[index]->capture = false;
+            moves[index]->capture = islower(b[row + 1][col - 2]) != 0;
             index++;
         }
         // 2 right 1 up (col + 2, row + 1)
@@ -685,10 +670,7 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[2] = row + 1;
             moves[index]->move[3] = col + 2;
             moves[index]->pieceCaptured = b[row + 1][col + 2];
-            if (islower(b[row + 1][col + 2]))
-                moves[index]->capture = true;
-            else
-                moves[index]->capture = false;
+            moves[index]->capture = islower(b[row + 1][col + 2]) != 0;
             index++;
         }
         // 1 left 2 up ( col - 1, row + 2)
@@ -699,10 +681,7 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[2] = row + 2;
             moves[index]->move[3] = col - 1;
             moves[index]->pieceCaptured = b[row + 2][col - 1];
-            if (islower(b[row + 2][col - 1]))
-                moves[index]->capture = true;
-            else
-                moves[index]->capture = false;
+            moves[index]->capture = islower(b[row + 2][col - 1]) != 0;
             index++;
         }
         // 1 right 2 up ( col + 1, row + 2)
@@ -713,10 +692,7 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[2] = row + 2;
             moves[index]->move[3] = col + 1;
             moves[index]->pieceCaptured = b[row + 2][col + 1];
-            if (islower(b[row + 2][col + 1]))
-                moves[index]->capture = true;
-            else
-                moves[index]->capture = false;
+            moves[index]->capture = islower(b[row + 2][col + 1]) != 0;
             index++;
         }
         // if senior backwards capture
