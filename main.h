@@ -11,6 +11,22 @@
 #define MAX 10000
 #define MIN -10000
 
+#define A 0
+#define B 1
+#define C 2
+#define D 3
+#define E 4
+#define F 5
+#define G 6
+#define H 7
+
+#define ROW_SIX 0
+#define ROW_FIVE 1
+#define ROW_FOUR 2
+#define ROW_THREE 3
+#define ROW_TWO 4
+#define ROW_ONE 5
+
 const int COMPUTER = 2;
 const int PLAYER = 1;
 const int MAX_MOVES = 50;
@@ -20,15 +36,6 @@ const int DONT_UNDO = 0;
 
 const int REASON_NO_MOVES_LEFT = 0;
 const int REASON_NO_KINGS_LEFT = 1;
-
-const int KING_MAX = 4;
-const int QUEEN_MAX = 3;
-const int KNIGHT_MAX = 2;
-const int BISHOP_MAX = 1;
-const int KING_MIN = -4;
-const int QUEEN_MIN = -3;
-const int KNIGHT_MIN = -2;
-const int BISHOP_MIN = -1;
 
 int PLAYER_KINGS;
 int COMPUTER_KINGS;
@@ -50,17 +57,17 @@ const char HORSE_P = 'h';
 const char BISHOP_P = 'b';
 const char PAWN_P = 'p';
 
-const std::string KING_UNI_C = "♚";
-const std::string HORSE_UNI_C = "♞";
-const std::string BISHOP_UNI_C = "♝";
-const std::string PAWN_UNI_C = "♟";
+const std::string KING_UNI_C = "\u265A";
+const std::string HORSE_UNI_C = "\u265E";
+const std::string BISHOP_UNI_C = "\u265D";
+const std::string PAWN_UNI_C = "\u265F";
 
-const std::string KING_UNI_P = "♔";
-const std::string HORSE_UNI_P = "♘";
-const std::string BISHOP_UNI_P = "♗";
-const std::string PAWN_UNI_P = "♙";
+const std::string KING_UNI_P = "\u2654";
+const std::string HORSE_UNI_P = "\u2658";
+const std::string BISHOP_UNI_P = "\u2657";
+const std::string PAWN_UNI_P = "\u2659";
 
-const std::string DOT = "·";
+const std::string DOT = "\u00B7";
 
 bool IS_PLAYER_TURN = false;
 bool IS_COMPUTER_TURN = false;

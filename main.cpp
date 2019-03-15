@@ -14,34 +14,33 @@ void setup() {
             b[i][j] = '-';
     }
 
-    b[5][0] = HORSE_P;
-    b[5][1] = HORSE_P;
-    b[5][3] = KING_P;
-    b[5][4] = KING_P;
-    b[5][6] = BISHOP_P;
-    b[5][7] = BISHOP_P;
+    b[ROW_ONE][A] = HORSE_P;
+    b[ROW_ONE][B] = HORSE_P;
+    b[ROW_ONE][D] = KING_P;
+    b[ROW_ONE][E] = KING_P;
+    b[ROW_ONE][G] = BISHOP_P;
+    b[ROW_ONE][H] = BISHOP_P;
 
-    b[4][1] = PAWN_P;
-    b[4][2] = PAWN_P;
-    b[4][3] = PAWN_P;
-    b[4][4] = PAWN_P;
-    b[4][5] = PAWN_P;
-    b[4][6] = PAWN_P;
+    b[ROW_TWO][B] = PAWN_P;
+    b[ROW_TWO][C] = PAWN_P;
+    b[ROW_TWO][D] = PAWN_P;
+    b[ROW_TWO][E] = PAWN_P;
+    b[ROW_TWO][F] = PAWN_P;
+    b[ROW_TWO][G] = PAWN_P;
 
-    b[0][0] = HORSE_C;
-    b[0][1] = HORSE_C;
-    b[0][3] = KING_C;
-    b[0][4] = KING_C;
-    b[0][6] = BISHOP_C;
-    b[0][7] = BISHOP_C;
+    b[ROW_SIX][A] = HORSE_C;
+    b[ROW_SIX][B] = HORSE_C;
+    b[ROW_SIX][D] = KING_C;
+    b[ROW_SIX][E] = KING_C;
+    b[ROW_SIX][G] = BISHOP_C;
+    b[ROW_SIX][H] = BISHOP_C;
 
-    b[1][1] = PAWN_C;
-    b[1][2] = PAWN_C;
-    b[1][3] = PAWN_C;
-    b[1][4] = PAWN_C;
-    b[1][5] = PAWN_C;
-    b[1][6] = PAWN_C;
-
+    b[ROW_FIVE][B] = PAWN_C;
+    b[ROW_FIVE][C] = PAWN_C;
+    b[ROW_FIVE][D] = PAWN_C;
+    b[ROW_FIVE][E] = PAWN_C;
+    b[ROW_FIVE][F] = PAWN_C;
+    b[ROW_FIVE][G] = PAWN_C;
 }
 
 void play() {
@@ -113,14 +112,14 @@ void computerTurn() {
     // print computer move
     std::cout << "My move is "
               << (char) (move.move[1] + 'A')
-              << move.move[0] + BOARD_ROWS
+              << 6 - move.move[0]
               << (char) (move.move[3] + 'A')
-              << BOARD_ROWS - move.move[2]
+              << 6 - move.move[2]
               << "("
               << (char) (move.move[1] + 'A')
-              << 7 - (BOARD_ROWS + move.move[0])
+              << 9 - (8 - move.move[0])
               << (char) (move.move[3] + 'A')
-              << 7 - (BOARD_ROWS - move.move[2])
+              << 9 - (8 - move.move[2])
               << ")" << std::endl;
 
 
@@ -950,7 +949,34 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
         }
     } else // if(computer)
     {
+        // forward and right
         int i = 1;
+        while (moveInBounds(row + i, col - i)) {
+            if (!isupper(b[row + i][col - i])) {
+                moves[index]->move[0] = row;
+                moves[index]->move[1] = col;
+                moves[index]->move[2] = row + i;
+                moves[index]->move[3] = col - i;
+                moves[index]->pieceCaptured = b[row + i][col - i];
+                if (shouldChangeIdentity(moves[index])) {
+                    moves[index]->shouldChange = true;
+                    moves[index]->newIdentity = HORSE_C;
+                }
+                if (islower(b[row + i][col - i])) {
+                    moves[index]->capture = true;
+                    index++;
+                    break;
+                } else {
+                    moves[index]->capture = false;
+                    index++;
+                }
+            } else
+                break;
+            i++;
+        }
+
+        // forward and left
+        i = 1;
         while (moveInBounds(row + i, col + i)) {
             if (!isupper(b[row + i][col + i])) {
                 moves[index]->move[0] = row;
@@ -975,30 +1001,7 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
             i++;
         }
 
-        i = 1;
-        while (moveInBounds(row + i, col - i)) {
-            if (!isupper(b[row + i][col - i])) {
-                moves[index]->move[0] = row;
-                moves[index]->move[1] = col;
-                moves[index]->move[2] = row + i;
-                moves[index]->move[3] = col - i;
-                moves[index]->pieceCaptured = b[row + i][col - i];
-                if (shouldChangeIdentity(moves[index])) {
-                    moves[index]->shouldChange = true;
-                    moves[index]->newIdentity = HORSE_C;
-                }
-                if (islower(b[row + i][col - i])) {
-                    moves[index]->capture = true;
-                    index++;
-                    break;
-                } else {
-                    moves[index]->capture = false;
-                    index++;
-                }
-            } else
-                break;
-            i++;
-        }
+
 
         i = 1;
         while (moveInBounds(row - i, col + i)) {
