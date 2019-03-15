@@ -73,7 +73,7 @@ struct Move {
     int move[4];
     bool capture;
     char pieceCaptured;
-    bool leftWing;
+    bool shouldChange;
     char newIdentity;
 };
 
@@ -122,7 +122,7 @@ int whatQuadrant(int row, int col);
 
 bool isSenior(bool isPlayer, int row, int col);
 
-bool isLeftWing(bool isPlayer, int row, int col);
+bool shouldChangeIdentity(Move *move);
 
 // Move generator
 int generatePlayerMoves(Move **moves);

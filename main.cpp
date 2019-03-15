@@ -14,33 +14,35 @@ void setup() {
             b[i][j] = '-';
     }
 
-    b[5][0] = HORSE_P;
-    b[5][1] = HORSE_P;
-    b[5][3] = KING_P;
-    b[5][4] = KING_P;
-    b[5][6] = BISHOP_P;
-    b[5][7] = BISHOP_P;
-
-    b[4][1] = PAWN_P;
-    b[4][2] = PAWN_P;
-    b[4][3] = PAWN_P;
-    b[4][4] = PAWN_P;
-    b[4][5] = PAWN_P;
-    b[4][6] = PAWN_P;
-
-    b[0][0] = HORSE_C;
-    b[0][1] = HORSE_C;
-    b[0][3] = KING_C;
-    b[0][4] = KING_C;
-    b[0][6] = BISHOP_C;
-    b[0][7] = BISHOP_C;
-
+//    b[5][0] = HORSE_P;
+//    b[5][1] = HORSE_P;
+//    b[5][3] = KING_P;
+//    b[5][4] = KING_P;
+//    b[5][6] = BISHOP_P;
+//    b[5][7] = BISHOP_P;
+//
+//    b[4][1] = PAWN_P;
+//    b[4][2] = PAWN_P;
+//    b[4][3] = PAWN_P;
+//    b[4][4] = PAWN_P;
+//    b[4][5] = PAWN_P;
+//    b[4][6] = PAWN_P;
+//
+//    b[0][0] = HORSE_C;
+//    b[0][1] = HORSE_C;
+//    b[0][3] = KING_C;
+//    b[0][4] = KING_C;
+//    b[0][6] = BISHOP_C;
+//    b[0][7] = BISHOP_C;
+//
     b[1][1] = PAWN_C;
     b[1][2] = PAWN_C;
     b[1][3] = PAWN_C;
     b[1][4] = PAWN_C;
     b[1][5] = PAWN_C;
     b[1][6] = PAWN_C;
+
+    b[3][3] = HORSE_P;
 }
 
 void play() {
@@ -244,16 +246,30 @@ int evaluate() {}
 int checkForWinner() {}
 
 void movePiece(Move *move, bool undo) {
+    char temp;
     if (undo) {
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
         b[move->move[2]][move->move[3]] = move->pieceCaptured;
     } else {
-        char temp = b[move->move[0]][move->move[1]];
+        temp = b[move->move[0]][move->move[1]];
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
         b[move->move[2]][move->move[3]] = temp;
         if (move->capture)
             b[move->move[0]][move->move[1]] = '-';
     }
+    //if should change identity
+    // temp = current identity
+    // current = new identity
+    // new identity = temp
+    std::cout << move->move[0] << move->move[1] << move->move[2] << move->move[3] << std::endl;
+    if(move->shouldChange){
+        std::cout << "change please" << std::endl;
+        temp = b[move->move[0]][move->move[1]];
+        b[move->move[0]][move->move[1]] = move->newIdentity;
+        move->newIdentity = temp;
+    }
+    else
+        std::cout << "why no change" << std::endl;
 }
 
 void displayBoard() {
@@ -313,23 +329,28 @@ bool moveInBounds(int row, int col) {
 }
 
 bool isSenior(bool isPlayer, int row, int col) {
+    int quad = whatQuadrant(row, col);
     if (isPlayer) {
-        if (whatQuadrant(row, col) == 1 || whatQuadrant(row, col) == 2)
+        if (quad == 1 || quad == 2)
             return true;
-    } else if (whatQuadrant(row, col) == 3 || whatQuadrant(row, col) == 4)
+    } else if (quad == 3 || quad == 4)
         return true;
 
     return false;
 }
 
-bool isLeftWing(bool isPlayer, int row, int col) {
-    if (isPlayer) {
-        if (whatQuadrant(row, col) == 2 || whatQuadrant(row, col) == 3)
-            return true;
-    } else if (whatQuadrant(row, col) == 1 || whatQuadrant(row, col) == 4)
+bool shouldChangeIdentity(Move *move) {
+    int from_quad = whatQuadrant(move->move[0], move->move[1]);
+    int to_quad = whatQuadrant(move->move[2], move->move[3]);
+
+    if(from_quad == 1 && (to_quad == 2 || to_quad == 3))
+        return true;
+    if(from_quad == 2 && (to_quad == 1 || to_quad == 4))
+        return true;
+    if(from_quad == 3 && (to_quad == 1 || to_quad == 4))
         return true;
 
-    return false;
+    return from_quad == 4 && (to_quad == 2 || to_quad == 3);
 }
 
 int whatQuadrant(int row, int col) {
@@ -572,8 +593,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 2;
             moves[index]->pieceCaptured = b[row - 1][col - 2];
             moves[index]->capture = isupper(b[row - 1][col - 2]) != 0;
-            if (isLeftWing(true, row - 1, col - 2)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_P;
             }
             index++;
@@ -587,8 +608,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 2;
             moves[index]->pieceCaptured = b[row - 1][col + 2];
             moves[index]->capture = isupper(b[row - 1][col + 2]) != 0;
-            if (isLeftWing(true, row - 1, col + 2)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_P;
             }
             index++;
@@ -602,8 +623,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 1;
             moves[index]->pieceCaptured = b[row - 2][col - 1];
             moves[index]->capture = isupper(b[row - 2][col - 1]) != 0;
-            if (isLeftWing(true, row - 2, col - 1)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_P;
             }
             index++;
@@ -617,8 +638,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 1;
             moves[index]->pieceCaptured = b[row - 2][col + 1];
             moves[index]->capture = isupper(b[row - 2][col + 1]) != 0;
-            if (isLeftWing(true, row - 2, col + 1)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_P;
             }
             index++;
@@ -634,8 +655,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 2;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row + 1][col - 2];
-            if (isLeftWing(true, row + 1, col - 2)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_P;
             }
             index++;
@@ -650,8 +671,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 2;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row + 1][col + 2];
-            if (isLeftWing(true, row + 1, col + 2)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_P;
             }
             index++;
@@ -666,8 +687,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row + 2][col - 1];
-            if (isLeftWing(true, row + 2, col - 1)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_P;
             }
             index++;
@@ -682,8 +703,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row + 2][col + 1];
-            if (isLeftWing(true, row + 2, col + 1)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_P;
             }
             index++;
@@ -699,8 +720,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 2;
             moves[index]->pieceCaptured = b[row + 1][col - 2];
             moves[index]->capture = islower(b[row + 1][col - 2]) != 0;
-            if (isLeftWing(false, row + 1, col - 2)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_C;
             }
             index++;
@@ -714,8 +735,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 2;
             moves[index]->pieceCaptured = b[row + 1][col + 2];
             moves[index]->capture = islower(b[row + 1][col + 2]) != 0;
-            if (isLeftWing(false, row + 1, col + 2)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_C;
             }
             index++;
@@ -729,8 +750,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 1;
             moves[index]->pieceCaptured = b[row + 2][col - 1];
             moves[index]->capture = islower(b[row + 2][col - 1]) != 0;
-            if (isLeftWing(false, row + 2, col - 1)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_C;
             }
             index++;
@@ -744,8 +765,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 1;
             moves[index]->pieceCaptured = b[row + 2][col + 1];
             moves[index]->capture = islower(b[row + 2][col + 1]) != 0;
-            if (isLeftWing(false, row + 2, col + 1)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_C;
             }
             index++;
@@ -761,8 +782,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 2;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row - 1][col - 2];
-            if (isLeftWing(false, row - 1, col - 2)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_C;
             }
             index++;
@@ -777,8 +798,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 2;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row - 1][col + 2];
-            if (isLeftWing(false, row - 1, col + 2)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_C;
             }
             index++;
@@ -793,8 +814,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row - 2][col - 1];
-            if (isLeftWing(false, row - 2, col - 1)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_C;
             }
             index++;
@@ -809,8 +830,8 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row - 2][col + 1];
-            if (isLeftWing(false, row - 2, col + 1)) {
-                moves[index]->leftWing = true;
+            if (shouldChangeIdentity(moves[index])) {
+                moves[index]->shouldChange = true;
                 moves[index]->newIdentity = BISHOP_C;
             }
             index++;
@@ -830,8 +851,8 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[2] = row - i;
                 moves[index]->move[3] = col + i;
                 moves[index]->pieceCaptured = b[row - i][col + i];
-                if (isLeftWing(true, row - i, col + i)) {
-                    moves[index]->leftWing = true;
+                if (shouldChangeIdentity(moves[index])) {
+                    moves[index]->shouldChange = true;
                     moves[index]->newIdentity = HORSE_P;
                 }
                 if (isupper(b[row - i][col + i])) {
@@ -855,8 +876,8 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[2] = row - i;
                 moves[index]->move[3] = col - i;
                 moves[index]->pieceCaptured = b[row - i][col - i];
-                if (isLeftWing(true, row - i, col - i)) {
-                    moves[index]->leftWing = true;
+                if (shouldChangeIdentity(moves[index])) {
+                    moves[index]->shouldChange = true;
                     moves[index]->newIdentity = HORSE_P;
                 }
                 if (isupper(b[row - i][col - i])) {
@@ -881,8 +902,8 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[3] = col + i;
                 moves[index]->capture = true;
                 moves[index]->pieceCaptured = b[row + i][col + i];
-                if (isLeftWing(true, row + i, col + i)) {
-                    moves[index]->leftWing = true;
+                if (shouldChangeIdentity(moves[index])) {
+                    moves[index]->shouldChange = true;
                     moves[index]->newIdentity = HORSE_P;
                 }
                 index++;
@@ -901,8 +922,8 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[3] = col - i;
                 moves[index]->capture = true;
                 moves[index]->pieceCaptured = b[row + i][col - i];
-                if (isLeftWing(true, row + i, col - i)) {
-                    moves[index]->leftWing = true;
+                if (shouldChangeIdentity(moves[index])) {
+                    moves[index]->shouldChange = true;
                     moves[index]->newIdentity = HORSE_P;
                 }
                 index++;
@@ -921,8 +942,8 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[2] = row + i;
                 moves[index]->move[3] = col + i;
                 moves[index]->pieceCaptured = b[row + i][col + i];
-                if (isLeftWing(false, row + i, col + i)) {
-                    moves[index]->leftWing = true;
+                if (shouldChangeIdentity(moves[index])) {
+                    moves[index]->shouldChange = true;
                     moves[index]->newIdentity = HORSE_C;
                 }
                 if (islower(b[row + i][col + i])) {
@@ -946,8 +967,8 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[2] = row + i;
                 moves[index]->move[3] = col - i;
                 moves[index]->pieceCaptured = b[row + i][col - i];
-                if (isLeftWing(false, row + i, col - i)) {
-                    moves[index]->leftWing = true;
+                if (shouldChangeIdentity(moves[index])) {
+                    moves[index]->shouldChange = true;
                     moves[index]->newIdentity = HORSE_C;
                 }
                 if (islower(b[row + i][col - i])) {
@@ -972,8 +993,8 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[3] = col + i;
                 moves[index]->capture = true;
                 moves[index]->pieceCaptured = b[row - i][col + i];
-                if (isLeftWing(false, row - i, col + i)) {
-                    moves[index]->leftWing = true;
+                if (shouldChangeIdentity(moves[index])) {
+                    moves[index]->shouldChange = true;
                     moves[index]->newIdentity = HORSE_C;
                 }
                 index++;
@@ -992,8 +1013,8 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[3] = col - i;
                 moves[index]->capture = true;
                 moves[index]->pieceCaptured = b[row - i][col - i];
-                if (isLeftWing(false, row - i, col - i)) {
-                    moves[index]->leftWing = true;
+                if (shouldChangeIdentity(moves[index])) {
+                    moves[index]->shouldChange = true;
                     moves[index]->newIdentity = HORSE_C;
                 }
                 index++;
