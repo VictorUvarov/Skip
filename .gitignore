@@ -152,3 +152,6 @@ modules.xml
 .history
 
 # End of https://www.gitignore.io/api/c,clion+all,visualstudiocode
+
+CMakeLists.txt
+skip
