@@ -57,6 +57,9 @@ const std::string PAWN_UNI_P = "♙";
 
 const std::string DOT = "·";
 
+bool IS_PLAYER_TURN = false;
+bool IS_COMPUTER_TURN = false;
+
 struct Move {
     // move[0] = from row
     // move[1] = from col
@@ -89,7 +92,17 @@ void allocateMoves(Move *moves[50]);
 
 void deallocateMoves(Move *moves[50]);
 
+// Minimax
+
 Move miniMax();
+
+int min(int depth,int parentBest,int maxDepth,time_t start);
+
+int max(int depth,int parentBest,int maxDepth,time_t start);
+
+int evaluate();
+
+int checkForWinner();
 
 // Board
 void displayBoard();

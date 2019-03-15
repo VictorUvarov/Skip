@@ -63,6 +63,7 @@ void play() {
 }
 
 void playerTurn() {
+    IS_PLAYER_TURN = true; IS_COMPUTER_TURN = false;
     Move *moves[MAX_MOVES];
     Move *playerMove = new Move;
     bool legalMove = false;
@@ -103,6 +104,7 @@ void playerTurn() {
 }
 
 void computerTurn() {
+    IS_PLAYER_TURN = false; IS_COMPUTER_TURN = true;
     printf("Just thinking..\n");
     Move move = miniMax();
     // print computer move
@@ -168,7 +170,7 @@ bool isValidMove(Move **moves, Move *playerMove) {
     return legalMove;
 }
 
-void printMoves(Move **moves,const int size) {
+void printMoves(Move **moves, const int size) {
     std::cout << "Available Moves: ";
     for (int i = 0; i < size; i++) {
         std::cout << (char) (moves[i]->move[1] + 'A') // from col
@@ -227,6 +229,18 @@ Move miniMax() {
     return bestMove;
 }
 
+int max(int depth, int parentBest, int maxDepth, time_t start) {
+
+}
+
+int min(int depth, int parentBest, int maxDepth, time_t start) {
+
+}
+
+int evaluate() {}
+
+int checkForWinner() {}
+
 void movePiece(Move *move, bool undo) {
     if (undo) {
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
@@ -241,7 +255,10 @@ void movePiece(Move *move, bool undo) {
 }
 
 void displayBoard() {
-    std::cout << "\n   -----------------------  Computer\n";
+    if(IS_COMPUTER_TURN)
+        std::cout << "\n   \033[31;1;1m-----------------------  Computer\033[0m\n";
+    else
+        std::cout << "\n   -----------------------  Computer\n";
     for (int i = 0; i < BOARD_ROWS; i++) {
         std::cout << BOARD_ROWS - i << " ";
         for (int j = 0; j < BOARD_COLS; j++) {
@@ -278,7 +295,10 @@ void displayBoard() {
 
     }
     std::cout << "   A  B  C  D  E  F  G  H\n";
-    std::cout << "   -----------------------  Human\n";
+    if(IS_PLAYER_TURN)
+        std::cout << "   \033[34;1;1m-----------------------  Human\033[0m\n";
+    else
+        std::cout << "   -----------------------  Human\n";
 }
 
 bool moveInBounds(int row, int col) {
