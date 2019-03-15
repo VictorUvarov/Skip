@@ -6,6 +6,11 @@
 #include <string>
 #include <iostream>
 
+#define WIN 20000
+#define LOSE -20000
+#define MAX 10000
+#define MIN -10000
+
 const int COMPUTER = 2;
 const int PLAYER = 1;
 const int MAX_MOVES = 50;
@@ -68,6 +73,8 @@ struct Move {
     int move[4];
     bool capture;
     char pieceCaptured;
+    bool leftWing;
+    char newIdentity;
 };
 
 void setup();

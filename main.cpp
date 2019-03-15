@@ -63,7 +63,8 @@ void play() {
 }
 
 void playerTurn() {
-    IS_PLAYER_TURN = true; IS_COMPUTER_TURN = false;
+    IS_PLAYER_TURN = true;
+    IS_COMPUTER_TURN = false;
     Move *moves[MAX_MOVES];
     Move *playerMove = new Move;
     bool legalMove = false;
@@ -104,7 +105,8 @@ void playerTurn() {
 }
 
 void computerTurn() {
-    IS_PLAYER_TURN = false; IS_COMPUTER_TURN = true;
+    IS_PLAYER_TURN = false;
+    IS_COMPUTER_TURN = true;
     printf("Just thinking..\n");
     Move move = miniMax();
     // print computer move
@@ -255,14 +257,14 @@ void movePiece(Move *move, bool undo) {
 }
 
 void displayBoard() {
-    if(IS_COMPUTER_TURN)
+    if (IS_COMPUTER_TURN)
         std::cout << "\n  \033[31;1;1m--------------------------------  Computer\033[0m\n";
     else
         std::cout << "\n  --------------------------------  Computer\n";
     for (int i = 0; i < BOARD_ROWS; i++) {
         std::cout << BOARD_ROWS - i << " ";
         for (int j = 0; j < BOARD_COLS; j++) {
-            if((i + j) % 2 == 0)
+            if ((i + j) % 2 == 0)
                 std::cout << "\033[48;5;57m";
 
             switch (b[i][j]) {
@@ -300,7 +302,7 @@ void displayBoard() {
 
     }
     std::cout << "   A   B   C   D   E   F   G   H\n";
-    if(IS_PLAYER_TURN)
+    if (IS_PLAYER_TURN)
         std::cout << "  \033[34;1;1m--------------------------------  Human\033[0m\n";
     else
         std::cout << "  --------------------------------  Human\n";
@@ -570,6 +572,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 2;
             moves[index]->pieceCaptured = b[row - 1][col - 2];
             moves[index]->capture = isupper(b[row - 1][col - 2]) != 0;
+            if (isLeftWing(true, row - 1, col - 2)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_P;
+            }
             index++;
         }
         // 2 right 1 up (col + 2, row - 1)
@@ -581,6 +587,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 2;
             moves[index]->pieceCaptured = b[row - 1][col + 2];
             moves[index]->capture = isupper(b[row - 1][col + 2]) != 0;
+            if (isLeftWing(true, row - 1, col + 2)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_P;
+            }
             index++;
         }
         // 1 left 2 up ( col - 1, row - 2)
@@ -592,6 +602,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 1;
             moves[index]->pieceCaptured = b[row - 2][col - 1];
             moves[index]->capture = isupper(b[row - 2][col - 1]) != 0;
+            if (isLeftWing(true, row - 2, col - 1)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_P;
+            }
             index++;
         }
         // 1 right 2 up ( col + 1, row - 2)
@@ -603,6 +617,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 1;
             moves[index]->pieceCaptured = b[row - 2][col + 1];
             moves[index]->capture = isupper(b[row - 2][col + 1]) != 0;
+            if (isLeftWing(true, row - 2, col + 1)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_P;
+            }
             index++;
         }
         // if senior backwards capture
@@ -616,6 +634,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 2;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row + 1][col - 2];
+            if (isLeftWing(true, row + 1, col - 2)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_P;
+            }
             index++;
         }
         // 2 right 1 down (col + 2, row + 1)
@@ -628,6 +650,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 2;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row + 1][col + 2];
+            if (isLeftWing(true, row + 1, col + 2)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_P;
+            }
             index++;
         }
         // 1 left 2 down (col - 1, row + 2)
@@ -640,6 +666,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row + 2][col - 1];
+            if (isLeftWing(true, row + 2, col - 1)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_P;
+            }
             index++;
         }
         // 1 right 2 down (col + 1, row + 2)
@@ -652,6 +682,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row + 2][col + 1];
+            if (isLeftWing(true, row + 2, col + 1)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_P;
+            }
             index++;
         }
     } else // if(computer)
@@ -665,6 +699,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 2;
             moves[index]->pieceCaptured = b[row + 1][col - 2];
             moves[index]->capture = islower(b[row + 1][col - 2]) != 0;
+            if (isLeftWing(false, row + 1, col - 2)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_C;
+            }
             index++;
         }
         // 2 right 1 up (col + 2, row + 1)
@@ -676,6 +714,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 2;
             moves[index]->pieceCaptured = b[row + 1][col + 2];
             moves[index]->capture = islower(b[row + 1][col + 2]) != 0;
+            if (isLeftWing(false, row + 1, col + 2)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_C;
+            }
             index++;
         }
         // 1 left 2 up ( col - 1, row + 2)
@@ -687,6 +729,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 1;
             moves[index]->pieceCaptured = b[row + 2][col - 1];
             moves[index]->capture = islower(b[row + 2][col - 1]) != 0;
+            if (isLeftWing(false, row + 2, col - 1)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_C;
+            }
             index++;
         }
         // 1 right 2 up ( col + 1, row + 2)
@@ -698,6 +744,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 1;
             moves[index]->pieceCaptured = b[row + 2][col + 1];
             moves[index]->capture = islower(b[row + 2][col + 1]) != 0;
+            if (isLeftWing(false, row + 2, col + 1)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_C;
+            }
             index++;
         }
         // if senior backwards capture
@@ -711,6 +761,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 2;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row - 1][col - 2];
+            if (isLeftWing(false, row - 1, col - 2)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_C;
+            }
             index++;
         }
         // 2 right 1 down (col + 2, row - 1)
@@ -723,6 +777,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 2;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row - 1][col + 2];
+            if (isLeftWing(false, row - 1, col + 2)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_C;
+            }
             index++;
         }
         // 1 left 2 down (col - 1, row - 2)
@@ -735,6 +793,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row - 2][col - 1];
+            if (isLeftWing(false, row - 2, col - 1)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_C;
+            }
             index++;
         }
         // 1 right 2 down (col + 1, row - 2)
@@ -747,6 +809,10 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
             moves[index]->pieceCaptured = b[row - 2][col + 1];
+            if (isLeftWing(false, row - 2, col + 1)) {
+                moves[index]->leftWing = true;
+                moves[index]->newIdentity = BISHOP_C;
+            }
             index++;
         }
     }
@@ -764,6 +830,10 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[2] = row - i;
                 moves[index]->move[3] = col + i;
                 moves[index]->pieceCaptured = b[row - i][col + i];
+                if (isLeftWing(true, row - i, col + i)) {
+                    moves[index]->leftWing = true;
+                    moves[index]->newIdentity = HORSE_P;
+                }
                 if (isupper(b[row - i][col + i])) {
                     moves[index]->capture = true;
                     index++;
@@ -785,6 +855,10 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[2] = row - i;
                 moves[index]->move[3] = col - i;
                 moves[index]->pieceCaptured = b[row - i][col - i];
+                if (isLeftWing(true, row - i, col - i)) {
+                    moves[index]->leftWing = true;
+                    moves[index]->newIdentity = HORSE_P;
+                }
                 if (isupper(b[row - i][col - i])) {
                     moves[index]->capture = true;
                     index++;
@@ -807,6 +881,10 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[3] = col + i;
                 moves[index]->capture = true;
                 moves[index]->pieceCaptured = b[row + i][col + i];
+                if (isLeftWing(true, row + i, col + i)) {
+                    moves[index]->leftWing = true;
+                    moves[index]->newIdentity = HORSE_P;
+                }
                 index++;
                 break;
             } else if (islower(b[row + i][col + i]))
@@ -823,6 +901,10 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[3] = col - i;
                 moves[index]->capture = true;
                 moves[index]->pieceCaptured = b[row + i][col - i];
+                if (isLeftWing(true, row + i, col - i)) {
+                    moves[index]->leftWing = true;
+                    moves[index]->newIdentity = HORSE_P;
+                }
                 index++;
                 break;
             } else if (islower(b[row + i][col - i]))
@@ -839,6 +921,10 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[2] = row + i;
                 moves[index]->move[3] = col + i;
                 moves[index]->pieceCaptured = b[row + i][col + i];
+                if (isLeftWing(false, row + i, col + i)) {
+                    moves[index]->leftWing = true;
+                    moves[index]->newIdentity = HORSE_C;
+                }
                 if (islower(b[row + i][col + i])) {
                     moves[index]->capture = true;
                     index++;
@@ -860,6 +946,10 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[2] = row + i;
                 moves[index]->move[3] = col - i;
                 moves[index]->pieceCaptured = b[row + i][col - i];
+                if (isLeftWing(false, row + i, col - i)) {
+                    moves[index]->leftWing = true;
+                    moves[index]->newIdentity = HORSE_C;
+                }
                 if (islower(b[row + i][col - i])) {
                     moves[index]->capture = true;
                     index++;
@@ -882,6 +972,10 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[3] = col + i;
                 moves[index]->capture = true;
                 moves[index]->pieceCaptured = b[row - i][col + i];
+                if (isLeftWing(false, row - i, col + i)) {
+                    moves[index]->leftWing = true;
+                    moves[index]->newIdentity = HORSE_C;
+                }
                 index++;
                 break;
             } else if (isupper(b[row - i][col + i]))
@@ -898,6 +992,10 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
                 moves[index]->move[3] = col - i;
                 moves[index]->capture = true;
                 moves[index]->pieceCaptured = b[row - i][col - i];
+                if (isLeftWing(false, row - i, col - i)) {
+                    moves[index]->leftWing = true;
+                    moves[index]->newIdentity = HORSE_C;
+                }
                 index++;
                 break;
             } else if (isupper(b[row - i][col - i]))
