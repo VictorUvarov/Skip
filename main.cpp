@@ -242,7 +242,33 @@ int min(int depth, int parentBest, int maxDepth, time_t start) {
 
 }
 
-int evaluate() {}
+int evaluate() {
+    int pieces = 0;
+    int piecesWeight = 0;
+    for (int i = 0; i < BOARD_ROWS; i++)
+    {
+        for (int j = 0; j < BOARD_COLS; j++)
+        {
+            if (islower(b[i][j]))
+                pieces--;
+            else if (isupper(b[i][j]))
+                pieces++;
+            else if (b[i][j] == KING_C)
+                piecesWeight += 4;
+            else if (b[i][j] == HORSE_C)
+                piecesWeight += 2;
+            else if (b[i][j] == BISHOP_C)
+                piecesWeight += 1;
+            else if (b[i][j] == KING_P)
+                piecesWeight -= 4;
+            else if (b[i][j] == HORSE_P)
+                piecesWeight -= 2;
+            else if (b[i][j] == BISHOP_P)
+                piecesWeight -= 1;
+        }
+    }
+    return pieces + piecesWeight;
+}
 
 int checkForWinner() {}
 
