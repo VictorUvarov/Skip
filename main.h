@@ -96,7 +96,7 @@ void checkGameOver();
 
 void updateNumberOfKings();
 
-void gameOver(int player);
+void gameOver(int player, int reason);
 
 void printMoves(Move **moves, int left);
 

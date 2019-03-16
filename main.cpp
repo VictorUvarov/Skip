@@ -8,25 +8,27 @@ int main() {
 }
 
 void setup() {
+    PLAYER_KINGS = 2;
+    COMPUTER_KINGS = 2;
     int i, j;
     for (i = 0; i < BOARD_ROWS; i++) {
         for (j = 0; j < BOARD_COLS; j++)
             b[i][j] = '-';
     }
 
-    b[ROW_ONE][A] = HORSE_P;
-    b[ROW_ONE][B] = HORSE_P;
+//    b[ROW_ONE][A] = HORSE_P;
+//    b[ROW_ONE][B] = HORSE_P;
     b[ROW_ONE][D] = KING_P;
-    b[ROW_ONE][E] = KING_P;
-    b[ROW_ONE][G] = BISHOP_P;
-    b[ROW_ONE][H] = BISHOP_P;
-
-    b[ROW_TWO][B] = PAWN_P;
-    b[ROW_TWO][C] = PAWN_P;
-    b[ROW_TWO][D] = PAWN_P;
-    b[ROW_TWO][E] = PAWN_P;
-    b[ROW_TWO][F] = PAWN_P;
-    b[ROW_TWO][G] = PAWN_P;
+//    b[ROW_ONE][E] = KING_P;
+//    b[ROW_ONE][G] = BISHOP_P;
+//    b[ROW_ONE][H] = BISHOP_P;
+//
+//    b[ROW_TWO][B] = PAWN_P;
+//    b[ROW_TWO][C] = PAWN_P;
+//    b[ROW_TWO][D] = PAWN_P;
+//    b[ROW_TWO][E] = PAWN_P;
+//    b[ROW_TWO][F] = PAWN_P;
+//    b[ROW_TWO][G] = PAWN_P;
 
     b[ROW_SIX][A] = HORSE_C;
     b[ROW_SIX][B] = HORSE_C;
@@ -73,6 +75,8 @@ void playerTurn() {
     allocateMoves(moves);
 
     PLAYER_MOVES_LEFT = generatePlayerMoves(moves);
+    if (PLAYER_MOVES_LEFT == 0)
+        gameOver(PLAYER, REASON_NO_MOVES_LEFT);
     printMoves(moves, PLAYER_MOVES_LEFT);
 
     do {
@@ -130,22 +134,25 @@ void computerTurn() {
 }
 
 void checkGameOver() {
-    if (checkForWinner() == MIN) {
-        gameOver(COMPUTER);
-    }
-    if(checkForWinner() == MAX)
-        gameOver(PLAYER);
+    updateNumberOfKings();
+    if (PLAYER_KINGS == 0)
+        gameOver(PLAYER, REASON_NO_KINGS_LEFT);
+    if (COMPUTER_KINGS == 0)
+        gameOver(COMPUTER, REASON_NO_KINGS_LEFT);
 }
 
 void updateNumberOfKings() {
+    int k_c = 0, k_p = 0;
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
             if (b[i][j] == KING_P)
-                PLAYER_KINGS++;
+                k_p++;
             if (b[i][j] == KING_C)
-                COMPUTER_KINGS++;
+                k_c++;
         }
     }
+    PLAYER_KINGS = k_p;
+    COMPUTER_KINGS = k_c;
 }
 
 bool isValidMove(Move **moves, Move *playerMove) {
@@ -178,15 +185,27 @@ void printMoves(Move **moves, const int size) {
     std::cout << std::endl;
 }
 
-void gameOver(const int player) {
+void gameOver(const int player, const int reason) {
     if (player == PLAYER) {
-        std::cout << "COMPUTER WINS.\n";
-        displayBoard();
-        exit(EXIT_SUCCESS);
+        if (reason == REASON_NO_KINGS_LEFT) {
+            std::cout << "Player has no kings. COMPUTER WINS.\n";
+            displayBoard();
+            exit(EXIT_SUCCESS);
+        } else {
+            std::cout << "Player ran out of moves. COMPUTER WINS.\n";
+            displayBoard();
+            exit(EXIT_SUCCESS);
+        }
     } else {
-        std::cout << "YOU WIN!\n";
-        displayBoard();
-        exit(EXIT_SUCCESS);
+        if (reason == REASON_NO_KINGS_LEFT) {
+            std::cout << "Computer has no kings. YOU WIN!\n";
+            displayBoard();
+            exit(EXIT_SUCCESS);
+        } else {
+            std::cout << "Computer ran out of moves. YOU WIN!\n";
+            displayBoard();
+            exit(EXIT_SUCCESS);
+        }
     }
 }
 
@@ -209,11 +228,14 @@ Move miniMax() {
     allocateMoves(computer_moves);
 
     COMPUTER_MOVES_LEFT = generateComputerMoves(computer_moves);
+    if (COMPUTER_MOVES_LEFT == 0)
+        gameOver(COMPUTER, REASON_NO_MOVES_LEFT);
+
     for (int i = 0; i < COMPUTER_MOVES_LEFT; ++i) {
-        movePiece(computer_moves[i],DONT_UNDO);
+        movePiece(computer_moves[i], DONT_UNDO);
         score = min(depth + 1, maxDepth);
-        movePiece(computer_moves[i],UNDO);
-        if(score > bestScore) {
+        movePiece(computer_moves[i], UNDO);
+        if (score > bestScore) {
             bestScore = score;
             bestMove = *computer_moves[i];
         }
@@ -223,9 +245,9 @@ Move miniMax() {
 }
 
 int min(int depth, int maxDepth) {
-    if(checkForWinner() != 0)
+    if (checkForWinner() != 0)
         return checkForWinner();
-    if(depth == maxDepth)
+    if (depth == maxDepth)
         return evaluate();
 
     int bestScore = MAX, score;
@@ -234,10 +256,10 @@ int min(int depth, int maxDepth) {
     int size = generatePlayerMoves(moves);
 
     for (int i = 0; i < size; ++i) {
-        movePiece(moves[i],DONT_UNDO);
+        movePiece(moves[i], DONT_UNDO);
         score = max(depth + 1, maxDepth);
-        movePiece(moves[i],UNDO);
-        if(score < bestScore){
+        movePiece(moves[i], UNDO);
+        if (score < bestScore) {
             bestScore = score;
         }
     }
@@ -246,9 +268,9 @@ int min(int depth, int maxDepth) {
 }
 
 int max(int depth, int maxDepth) {
-    if(checkForWinner() != 0)
+    if (checkForWinner() != 0)
         return checkForWinner();
-    if(depth == maxDepth)
+    if (depth == maxDepth)
         return evaluate();
 
     int bestScore = MIN, score;
@@ -257,10 +279,10 @@ int max(int depth, int maxDepth) {
     int size = generateComputerMoves(moves);
 
     for (int i = 0; i < size; ++i) {
-        movePiece(moves[i],DONT_UNDO);
+        movePiece(moves[i], DONT_UNDO);
         score = min(depth + 1, maxDepth);
-        movePiece(moves[i],UNDO);
-        if(score > bestScore){
+        movePiece(moves[i], UNDO);
+        if (score > bestScore) {
             bestScore = score;
         }
     }
@@ -271,10 +293,8 @@ int max(int depth, int maxDepth) {
 int evaluate() {
     int pieces = 0;
     int piecesWeight = 0;
-    for (int i = 0; i < BOARD_ROWS; i++)
-    {
-        for (int j = 0; j < BOARD_COLS; j++)
-        {
+    for (int i = 0; i < BOARD_ROWS; i++) {
+        for (int j = 0; j < BOARD_COLS; j++) {
             if (islower(b[i][j]))
                 pieces--;
             else if (isupper(b[i][j]))
@@ -297,14 +317,14 @@ int evaluate() {
 }
 
 int checkForWinner() {
-    updateNumberOfKings(); // may or might not need, O(n^2)
-    if(PLAYER_MOVES_LEFT == 0)
+    updateNumberOfKings();
+    if (PLAYER_MOVES_LEFT == 0)
         return WIN;
-    if(PLAYER_KINGS == 0)
+    if (PLAYER_KINGS == 0)
         return WIN;
-    if(COMPUTER_MOVES_LEFT == 0)
+    if (COMPUTER_MOVES_LEFT == 0)
         return LOSE;
-    if(COMPUTER_KINGS == 0)
+    if (COMPUTER_KINGS == 0)
         return LOSE;
     return 0;
 }
@@ -314,7 +334,7 @@ void movePiece(Move *move, bool undo) {
     if (undo) {
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
         b[move->move[2]][move->move[3]] = move->pieceCaptured;
-        if(move->shouldChange) {
+        if (move->shouldChange) {
             temp = move->newIdentity;
             b[move->move[0]][move->move[1]] = move->newIdentity;
             move->newIdentity = temp;
@@ -325,7 +345,7 @@ void movePiece(Move *move, bool undo) {
         b[move->move[2]][move->move[3]] = temp;
         if (move->capture)
             b[move->move[0]][move->move[1]] = '-';
-        if(move->shouldChange) {
+        if (move->shouldChange) {
             b[move->move[2]][move->move[3]] = move->newIdentity;
             move->newIdentity = temp;
         }
@@ -403,11 +423,11 @@ bool shouldChangeIdentity(Move *move) {
     int from_quad = whatQuadrant(move->move[0], move->move[1]);
     int to_quad = whatQuadrant(move->move[2], move->move[3]);
 
-    if(from_quad == 1 && (to_quad == 2 || to_quad == 3))
+    if (from_quad == 1 && (to_quad == 2 || to_quad == 3))
         return true;
-    if(from_quad == 2 && (to_quad == 1 || to_quad == 4))
+    if (from_quad == 2 && (to_quad == 1 || to_quad == 4))
         return true;
-    if(from_quad == 3 && (to_quad == 1 || to_quad == 4))
+    if (from_quad == 3 && (to_quad == 1 || to_quad == 4))
         return true;
 
     return from_quad == 4 && (to_quad == 2 || to_quad == 3);
