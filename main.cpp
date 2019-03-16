@@ -204,26 +204,25 @@ void allocateMoves(Move *moves[50]) {
 Move miniMax() {
     Move *computer_moves[MAX_MOVES];
     Move bestMove = {};
-    int score, depth = 0, maxDepth = 5;
+    int score, depth = 0, maxDepth = 6;
     int bestScore = MIN;
     allocateMoves(computer_moves);
 
     COMPUTER_MOVES_LEFT = generateComputerMoves(computer_moves);
     for (int i = 0; i < COMPUTER_MOVES_LEFT; ++i) {
         movePiece(computer_moves[i],DONT_UNDO);
-        score = min(depth + 1, bestScore, maxDepth);
+        score = min(depth + 1, maxDepth);
         movePiece(computer_moves[i],UNDO);
         if(score > bestScore) {
             bestScore = score;
             bestMove = *computer_moves[i];
         }
     }
-
     deallocateMoves(computer_moves);
     return bestMove;
 }
 
-int min(int depth, int parentBest, int maxDepth) {
+int min(int depth, int maxDepth) {
     if(checkForWinner() != 0)
         return checkForWinner();
     if(depth == maxDepth)
@@ -236,9 +235,9 @@ int min(int depth, int parentBest, int maxDepth) {
 
     for (int i = 0; i < size; ++i) {
         movePiece(moves[i],DONT_UNDO);
-        score = max(depth + 1, bestScore, maxDepth);
+        score = max(depth + 1, maxDepth);
         movePiece(moves[i],UNDO);
-        if(score < parentBest){
+        if(score < bestScore){
             bestScore = score;
         }
     }
@@ -246,7 +245,7 @@ int min(int depth, int parentBest, int maxDepth) {
     return bestScore;
 }
 
-int max(int depth, int parentBest, int maxDepth) {
+int max(int depth, int maxDepth) {
     if(checkForWinner() != 0)
         return checkForWinner();
     if(depth == maxDepth)
@@ -259,9 +258,9 @@ int max(int depth, int parentBest, int maxDepth) {
 
     for (int i = 0; i < size; ++i) {
         movePiece(moves[i],DONT_UNDO);
-        score = min(depth + 1, bestScore, maxDepth);
+        score = min(depth + 1, maxDepth);
         movePiece(moves[i],UNDO);
-        if(score > parentBest){
+        if(score > bestScore){
             bestScore = score;
         }
     }
@@ -300,13 +299,13 @@ int evaluate() {
 int checkForWinner() {
     updateNumberOfKings(); // may or might not need, O(n^2)
     if(PLAYER_MOVES_LEFT == 0)
-        return MAX;
+        return WIN;
     if(PLAYER_KINGS == 0)
-        return MAX;
+        return WIN;
     if(COMPUTER_MOVES_LEFT == 0)
-        return MIN;
+        return LOSE;
     if(COMPUTER_KINGS == 0)
-        return MIN;
+        return LOSE;
     return 0;
 }
 
@@ -331,12 +330,6 @@ void movePiece(Move *move, bool undo) {
             move->newIdentity = temp;
         }
     }
-    // temp = original piece
-    // move piece b01 -> b23
-    // new position b23 = original piece
-    // if capture b01 = empty
-    // if change b23 = newIdentity
-    // new identity stored original position
 }
 
 void displayBoard() {

@@ -6,10 +6,10 @@
 #include <string>
 #include <iostream>
 
-#define WIN 20000
-#define LOSE -20000
-#define MAX 10000
-#define MIN -10000
+#define WIN 5000
+#define LOSE -5000
+#define MAX 20000
+#define MIN -20000
 
 #define A 0
 #define B 1
@@ -110,9 +110,9 @@ void deallocateMoves(Move *moves[50]);
 
 Move miniMax();
 
-int min(int depth,int parentBest,int maxDepth);
+int min(int depth, int maxDepth);
 
-int max(int depth,int parentBest,int maxDepth);
+int max(int depth, int maxDepth);
 
 int evaluate();
 
