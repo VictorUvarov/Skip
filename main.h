@@ -5,11 +5,13 @@
 #include <cstdio>
 #include <string>
 #include <iostream>
+#include <ctime>
 
 #define WIN 5000
 #define LOSE -5000
 #define MAX 20000
 #define MIN -20000
+#define TIMES_UP 10000
 
 #define A 0
 #define B 1
@@ -26,6 +28,7 @@
 #define ROW_THREE 3
 #define ROW_TWO 4
 #define ROW_ONE 5
+#define ALLOWED_TIME 5
 
 const int COMPUTER = 2;
 const int PLAYER = 1;
@@ -72,6 +75,8 @@ const std::string DOT = "\u00B7";
 bool IS_PLAYER_TURN = false;
 bool IS_COMPUTER_TURN = false;
 
+clock_t START_TIME;
+
 struct Move {
     // move[0] = from row
     // move[1] = from col
@@ -106,13 +111,19 @@ void allocateMoves(Move *moves[50]);
 
 void deallocateMoves(Move *moves[50]);
 
+void convertInput(Move *playerMove, const char *input);
+
+void printComputerMove(const Move &move);
+
+float timeDiff(clock_t begin_time);
+
 // Minimax
 
 Move miniMax();
 
-int min(int depth, int maxDepth);
+int min(int depth, int maxDepth, int parent_best_score);
 
-int max(int depth, int maxDepth);
+int max(int depth, int maxDepth, int parent_best_score);
 
 int evaluate();
 
@@ -143,9 +154,5 @@ int generateKingMoves(Move **moves, int index, bool player, int row, int col);
 int generateHorseMoves(Move **moves, int index, bool player, int row, int col);
 
 int generateBishopMoves(Move **moves, int index, bool player, int row, int col);
-
-void convertInput(Move *playerMove, const char *input);
-
-void printComputerMove(const Move &move);
 
 #endif //SKIP_MAIN_H

@@ -185,6 +185,8 @@ void printMoves(Move **moves, const int size) {
     std::cout << std::endl;
 }
 
+float timeDiff(const clock_t begin_time) { return float(clock() - begin_time) / CLOCKS_PER_SEC; }
+
 void gameOver(const int player, const int reason) {
     if (player == PLAYER) {
         if (reason == REASON_NO_KINGS_LEFT) {
@@ -222,29 +224,38 @@ void allocateMoves(Move *moves[50]) {
 
 Move miniMax() {
     Move *computer_moves[MAX_MOVES];
+    Move *prevBestMove = new Move();
     Move bestMove = {};
-    int score, depth = 0, maxDepth = 6;
+    int score = 0, i = 0, d = 0, depth = 0, maxDepth = 1;
     int bestScore = MIN;
+    START_TIME = clock();
     allocateMoves(computer_moves);
 
     COMPUTER_MOVES_LEFT = generateComputerMoves(computer_moves);
     if (COMPUTER_MOVES_LEFT == 0)
         gameOver(COMPUTER, REASON_NO_MOVES_LEFT);
 
-    for (int i = 0; i < COMPUTER_MOVES_LEFT; ++i) {
-        movePiece(computer_moves[i], DONT_UNDO);
-        score = min(depth + 1, maxDepth);
-        movePiece(computer_moves[i], UNDO);
-        if (score > bestScore) {
-            bestScore = score;
-            bestMove = *computer_moves[i];
+    while ((timeDiff(START_TIME)) < ALLOWED_TIME) {
+        for (i = 0; i < COMPUTER_MOVES_LEFT; ++i) {
+            movePiece(computer_moves[i], DONT_UNDO);
+            score = min(depth + 1, maxDepth + d, MIN);
+            movePiece(computer_moves[i], UNDO);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = *computer_moves[i];
+            }
         }
+        if (score == TIMES_UP) *prevBestMove = bestMove; // if early store last best
+        if (score == MAX) break; // stop searching if win
+        d++;
     }
+    std::cout << "dove down to depth " << maxDepth + i << " that turn\n";
+    if (score == TIMES_UP) bestMove = *prevBestMove; // if we break out early we want to return to last depths best
     deallocateMoves(computer_moves);
     return bestMove;
 }
 
-int min(const int depth, const int maxDepth) {
+int min(const int depth, const int maxDepth, const int parent_best_score) {
     if (checkForWinner() != 0)
         return checkForWinner();
     if (depth == maxDepth)
@@ -256,18 +267,29 @@ int min(const int depth, const int maxDepth) {
     int size = generatePlayerMoves(moves);
 
     for (int i = 0; i < size; ++i) {
-        movePiece(moves[i], DONT_UNDO);
-        score = max(depth + 1, maxDepth);
-        movePiece(moves[i], UNDO);
-        if (score < bestScore) {
-            bestScore = score;
+        if (timeDiff(START_TIME) >= ALLOWED_TIME) {
+            deallocateMoves(moves);
+            return TIMES_UP;
         }
+        movePiece(moves[i], DONT_UNDO);
+        score = max(depth + 1, maxDepth, parent_best_score);
+        movePiece(moves[i], UNDO);
+        if (score == TIMES_UP) {
+            deallocateMoves(moves);
+            return TIMES_UP;
+        }
+        if (score < parent_best_score) {
+            deallocateMoves(moves);
+            return score;
+        }
+        if (score < bestScore)
+            bestScore = score;
     }
     deallocateMoves(moves);
     return bestScore;
 }
 
-int max(const int depth, const int maxDepth) {
+int max(const int depth, const int maxDepth, const int parent_best_score) {
     if (checkForWinner() != 0)
         return checkForWinner();
     if (depth == maxDepth)
@@ -279,9 +301,21 @@ int max(const int depth, const int maxDepth) {
     int size = generateComputerMoves(moves);
 
     for (int i = 0; i < size; ++i) {
+        if (timeDiff(START_TIME) >= ALLOWED_TIME) {
+            deallocateMoves(moves);
+            return TIMES_UP;
+        }
         movePiece(moves[i], DONT_UNDO);
-        score = min(depth + 1, maxDepth);
+        score = min(depth + 1, maxDepth, parent_best_score);
         movePiece(moves[i], UNDO);
+        if (score == TIMES_UP) {
+            deallocateMoves(moves);
+            return TIMES_UP;
+        }
+        if (score > parent_best_score) {
+            deallocateMoves(moves);
+            return score;
+        }
         if (score > bestScore) {
             bestScore = score;
         }
