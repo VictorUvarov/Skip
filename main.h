@@ -31,8 +31,8 @@ const int COMPUTER = 2;
 const int PLAYER = 1;
 const int MAX_MOVES = 50;
 
-const int UNDO = 1;
-const int DONT_UNDO = 0;
+const bool UNDO = true;
+const bool DONT_UNDO = false;
 
 const int REASON_NO_MOVES_LEFT = 0;
 const int REASON_NO_KINGS_LEFT = 1;
@@ -96,7 +96,7 @@ void checkGameOver();
 
 void updateNumberOfKings();
 
-void gameOver(int player, int p);
+void gameOver(int player);
 
 void printMoves(Move **moves, int left);
 
@@ -110,9 +110,9 @@ void deallocateMoves(Move *moves[50]);
 
 Move miniMax();
 
-int min(int depth,int parentBest,int maxDepth,time_t start);
+int min(int depth,int parentBest,int maxDepth);
 
-int max(int depth,int parentBest,int maxDepth,time_t start);
+int max(int depth,int parentBest,int maxDepth);
 
 int evaluate();
 
