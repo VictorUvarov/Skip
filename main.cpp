@@ -16,19 +16,19 @@ void setup() {
             b[i][j] = '-';
     }
 
-//    b[ROW_ONE][A] = HORSE_P;
-//    b[ROW_ONE][B] = HORSE_P;
+    b[ROW_ONE][A] = HORSE_P;
+    b[ROW_ONE][B] = HORSE_P;
     b[ROW_ONE][D] = KING_P;
-//    b[ROW_ONE][E] = KING_P;
-//    b[ROW_ONE][G] = BISHOP_P;
-//    b[ROW_ONE][H] = BISHOP_P;
-//
-//    b[ROW_TWO][B] = PAWN_P;
-//    b[ROW_TWO][C] = PAWN_P;
-//    b[ROW_TWO][D] = PAWN_P;
-//    b[ROW_TWO][E] = PAWN_P;
-//    b[ROW_TWO][F] = PAWN_P;
-//    b[ROW_TWO][G] = PAWN_P;
+    b[ROW_ONE][E] = KING_P;
+    b[ROW_ONE][G] = BISHOP_P;
+    b[ROW_ONE][H] = BISHOP_P;
+
+    b[ROW_TWO][B] = PAWN_P;
+    b[ROW_TWO][C] = PAWN_P;
+    b[ROW_TWO][D] = PAWN_P;
+    b[ROW_TWO][E] = PAWN_P;
+    b[ROW_TWO][F] = PAWN_P;
+    b[ROW_TWO][G] = PAWN_P;
 
     b[ROW_SIX][A] = HORSE_C;
     b[ROW_SIX][B] = HORSE_C;
@@ -82,15 +82,9 @@ void playerTurn() {
     do {
         std::cout << "Enter move: ";
         if (std::cin >> input) {
-            // convert input to correct move format
-            playerMove->move[0] = '6' - input[1];
-            playerMove->move[1] = toupper(input[0]) - 'A';
-            playerMove->move[2] = '6' - input[3];
-            playerMove->move[3] = toupper(input[2]) - 'A';
-
-            // validate move
+            convertInput(playerMove, input);
             legalMove = isValidMove(moves, playerMove);
-            // move piece
+
             if (legalMove)
                 movePiece(playerMove, DONT_UNDO);
             else {
@@ -98,7 +92,6 @@ void playerTurn() {
                 std::cout << "Illegal move, ";
                 std::cout << "please review list of legal moves and try again.\n";
             }
-
         }
     } while (!legalMove);
 
@@ -111,25 +104,11 @@ void playerTurn() {
 void computerTurn() {
     IS_PLAYER_TURN = false;
     IS_COMPUTER_TURN = true;
-    printf("Just thinking..\n");
+    std::cout << "...\n";
     Move move = miniMax();
-    // print computer move
-    std::cout << "My move is "
-              << (char) (move.move[1] + 'A')
-              << 6 - move.move[0]
-              << (char) (move.move[3] + 'A')
-              << 6 - move.move[2]
-              << "("
-              << (char) (move.move[1] + 'A')
-              << 9 - (8 - move.move[0])
-              << (char) (move.move[3] + 'A')
-              << 9 - (8 - move.move[2])
-              << ")" << std::endl;
 
-
-    // computer move
+    printComputerMove(move);
     movePiece(&move, DONT_UNDO);
-    // display board
     displayBoard();
 }
 
@@ -153,6 +132,27 @@ void updateNumberOfKings() {
     }
     PLAYER_KINGS = k_p;
     COMPUTER_KINGS = k_c;
+}
+
+void convertInput(Move *playerMove, const char *input) {
+    playerMove->move[0] = '6' - input[1];
+    playerMove->move[1] = toupper(input[0]) - 'A';
+    playerMove->move[2] = '6' - input[3];
+    playerMove->move[3] = toupper(input[2]) - 'A';
+}
+
+void printComputerMove(const Move &move) {
+    std::cout << "My move is "
+              << (char) (move.move[1] + 'A')
+              << 6 - move.move[0]
+              << (char) (move.move[3] + 'A')
+              << 6 - move.move[2]
+              << "("
+              << (char) (move.move[1] + 'A')
+              << 9 - (8 - move.move[0])
+              << (char) (move.move[3] + 'A')
+              << 9 - (8 - move.move[2])
+              << ")" << std::endl;
 }
 
 bool isValidMove(Move **moves, Move *playerMove) {
@@ -244,7 +244,7 @@ Move miniMax() {
     return bestMove;
 }
 
-int min(int depth, int maxDepth) {
+int min(const int depth, const int maxDepth) {
     if (checkForWinner() != 0)
         return checkForWinner();
     if (depth == maxDepth)
@@ -267,7 +267,7 @@ int min(int depth, int maxDepth) {
     return bestScore;
 }
 
-int max(int depth, int maxDepth) {
+int max(const int depth, const int maxDepth) {
     if (checkForWinner() != 0)
         return checkForWinner();
     if (depth == maxDepth)
@@ -329,7 +329,7 @@ int checkForWinner() {
     return 0;
 }
 
-void movePiece(Move *move, bool undo) {
+void movePiece(Move *move, const bool undo) {
     char temp;
     if (undo) {
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
@@ -404,11 +404,11 @@ void displayBoard() {
         std::cout << "  --------------------------------  Human\n";
 }
 
-bool moveInBounds(int row, int col) {
+bool moveInBounds(const int row, const int col) {
     return row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS;
 }
 
-bool isSenior(bool isPlayer, int row, int col) {
+bool isSenior(const bool isPlayer, const int row, const int col) {
     int quad = whatQuadrant(row, col);
     if (isPlayer) {
         if (quad == 1 || quad == 2)
@@ -433,7 +433,7 @@ bool shouldChangeIdentity(Move *move) {
     return from_quad == 4 && (to_quad == 2 || to_quad == 3);
 }
 
-int whatQuadrant(int row, int col) {
+int whatQuadrant(const int row, const int col) {
     //Q1: ROW 0-2 | COL 4-7
     if (row >= 0 && row <= 2 && col >= 4 && col <= 7)
         return 1;
@@ -502,7 +502,7 @@ int generateComputerMoves(Move **moves) {
     return numberOfMoves;
 }
 
-int generatePawnMoves(Move **moves, int index, bool player, int row, int col) {
+int generatePawnMoves(Move **moves, int index, const bool player, const int row, const int col) {
     if (player) {
         //forward
         if (moveInBounds(row - 1, col) && b[row - 1][col] == '-') {
@@ -574,7 +574,7 @@ int generatePawnMoves(Move **moves, int index, bool player, int row, int col) {
     return index;
 }
 
-int generateKingMoves(Move **moves, int index, bool player, int row, int col) {
+int generateKingMoves(Move **moves, int index, const bool player, const int row, const int col) {
     if (player) {
         // right king
         if (moveInBounds(row, col + 1) && b[row][col + 1] == '-' && whatQuadrant(row, col) == 4) {
@@ -662,7 +662,7 @@ int generateKingMoves(Move **moves, int index, bool player, int row, int col) {
     return index;
 }
 
-int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
+int generateHorseMoves(Move **moves, int index, const bool player, const int row, const int col) {
     if (player) {
         // 2 left 1 up (col - 2, row - 1)
         if (moveInBounds(row - 1, col - 2) &&
@@ -920,7 +920,7 @@ int generateHorseMoves(Move **moves, int index, bool player, int row, int col) {
     return index;
 }
 
-int generateBishopMoves(Move **moves, int index, bool player, int row, int col) {
+int generateBishopMoves(Move **moves, int index, const bool player, const int row, const int col) {
     if (player) {
         //forward right diagonal
         int i = 1;

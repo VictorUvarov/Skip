@@ -66,7 +66,7 @@ const std::string KING_UNI_P = "\u2654";
 const std::string HORSE_UNI_P = "\u2658";
 const std::string BISHOP_UNI_P = "\u2657";
 const std::string PAWN_UNI_P = "\u2659";
-
+const std::string ROBOT = "\u1F91";
 const std::string DOT = "\u00B7";
 
 bool IS_PLAYER_TURN = false;
@@ -143,5 +143,9 @@ int generateKingMoves(Move **moves, int index, bool player, int row, int col);
 int generateHorseMoves(Move **moves, int index, bool player, int row, int col);
 
 int generateBishopMoves(Move **moves, int index, bool player, int row, int col);
+
+void convertInput(Move *playerMove, const char *input);
+
+void printComputerMove(const Move &move);
 
 #endif //SKIP_MAIN_H
