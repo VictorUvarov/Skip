@@ -956,7 +956,7 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
         // backwards right diagonal SENIOR ONLY
         i = 1;
         while (moveInBounds(row + i, col + i)) {
-            if (isSenior(true, row + i, col + i) && isupper(b[row + i][col + i])) {
+            if (isSenior(true, row, col) && isupper(b[row + i][col + i])) {
                 moves[index]->move[0] = row;
                 moves[index]->move[1] = col;
                 moves[index]->move[2] = row + i;
@@ -977,7 +977,7 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
         // backwards left diagonal SENIOR ONLY
         i = 1;
         while (moveInBounds(row + i, col - i)) {
-            if (isSenior(true, row + i, col - i) && isupper(b[row + i][col - i])) {
+            if (isSenior(true, row, col) && isupper(b[row + i][col - i])) {
                 moves[index]->move[0] = row;
                 moves[index]->move[1] = col;
                 moves[index]->move[2] = row + i;
@@ -1052,7 +1052,7 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
         // backwards right diagonal SENIOR ONLY
         i = 1;
         while (moveInBounds(row - i, col + i)) {
-            if (isSenior(true, row - i, col + i) && islower(b[row - i][col + i])) {
+            if (isSenior(false, row, col) && islower(b[row - i][col + i])) {
                 moves[index]->move[0] = row;
                 moves[index]->move[1] = col;
                 moves[index]->move[2] = row - i;
@@ -1073,7 +1073,7 @@ int generateBishopMoves(Move **moves, int index, bool player, int row, int col) 
         // backwards left diagonal SENIOR ONLY
         i = 1;
         while (moveInBounds(row - i, col - i)) {
-            if (isSenior(true, row - i, col - i) && islower(b[row - i][col - i])) {
+            if (isSenior(false, row, col) && islower(b[row - i][col - i])) {
                 moves[index]->move[0] = row;
                 moves[index]->move[1] = col;
                 moves[index]->move[2] = row - i;
