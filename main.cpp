@@ -212,7 +212,7 @@ Move miniMax() {
     Move *computer_moves[MAX_MOVES];
     Move *current_best_move = new Move();
     Move best_move = Move();
-    int score = 0, i, d = 0, depth = 0, max_depth = 1;
+    int score = 0, i = 0, d = 0, depth = 0, max_depth = 1;
     int best_score = MIN;
     START_TIME = clock();
     allocateMoves(computer_moves);
@@ -222,7 +222,7 @@ Move miniMax() {
         gameOver(COMPUTER, REASON_NO_MOVES_LEFT);
 
     while ((timeDiff(START_TIME)) < ALLOWED_TIME) {
-        for (i = 0; i < COMPUTER_MOVES_LEFT; ++i) {
+        for (; i < COMPUTER_MOVES_LEFT; ++i) {
             movePiece(computer_moves[i], DONT_UNDO);
             score = min(depth + 1, max_depth + d, MIN);
             movePiece(computer_moves[i], UNDO);
@@ -329,20 +329,25 @@ int max(const int depth, const int max_depth, const int parent_best_score) {
 }
 
 int evaluateMax(Move **moves,int &move_count, int depth){
-    int king_row = 0 , king_col = 0, i;
+    int king_row[2], king_col[2];
+    int i, p = 0;
     // find computer's king location
     for (i = 0; i < BOARD_ROWS; ++i) {
         for (int j = 0; j < BOARD_COLS; ++j) {
             if(b[i][j] == KING_C){
-                king_row = i;
-                king_col = j;
+                king_row[p] = i;
+                king_col[p] = j;
+                p++;
             }
         }
     }
 
     // find move 'to' location that matches computer king location
     for (i = 0; i < move_count; ++i) {
-        if(moves[i]->move[2] == king_row && moves[i]->move[3] == king_col){
+        if(moves[i]->move[2] == king_row[0] && moves[i]->move[3] == king_col[0]){
+            return WIN - depth;
+        }
+        if(moves[i]->move[2] == king_row[1] && moves[i]->move[3] == king_col[1]){
             return WIN - depth;
         }
     }
@@ -352,7 +357,7 @@ int evaluateMax(Move **moves,int &move_count, int depth){
     for (i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
             if (b[i][j] == KING_C)
-                score += 4;
+                score += 8;
             else if (b[i][j] == HORSE_C)
                 score += 3;
             else if (b[i][j] == BISHOP_C)
@@ -360,7 +365,7 @@ int evaluateMax(Move **moves,int &move_count, int depth){
             else if (b[i][j] == PAWN_C)
                 score += 1;
             else if (b[i][j] == KING_P)
-                score -= 4;
+                score -= 8;
             else if (b[i][j] == HORSE_P)
                 score -= 3;
             else if (b[i][j] == BISHOP_P)
@@ -373,20 +378,25 @@ int evaluateMax(Move **moves,int &move_count, int depth){
 }
 
 int evaluateMin(Move **moves,int &move_count, int depth){
-    int king_row = 0 , king_col = 0, i;
-    // find computer's king location
+    int king_row[2], king_col[2];
+    int i, p = 0;
+    // find computer's king locations
     for (i = 0; i < BOARD_ROWS; ++i) {
         for (int j = 0; j < BOARD_COLS; ++j) {
             if(b[i][j] == KING_P){
-                king_row = i;
-                king_col = j;
+                king_row[p] = i;
+                king_col[p] = j;
+                p++;
             }
         }
     }
 
-    // find move 'to' location that matches computer king location
+    // find move 'to' location that matches computer king locations
     for (i = 0; i < move_count; ++i) {
-        if(moves[i]->move[2] == king_row && moves[i]->move[3] == king_col){
+        if(moves[i]->move[2] == king_row[0] && moves[i]->move[3] == king_col[0]){
+            return LOSE + depth;
+        }
+        if(moves[i]->move[2] == king_row[1] && moves[i]->move[3] == king_col[1]){
             return LOSE + depth;
         }
     }
@@ -396,7 +406,7 @@ int evaluateMin(Move **moves,int &move_count, int depth){
     for (i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
             if (b[i][j] == KING_C)
-                score += 4;
+                score += 8;
             else if (b[i][j] == HORSE_C)
                 score += 3;
             else if (b[i][j] == BISHOP_C)
@@ -404,7 +414,7 @@ int evaluateMin(Move **moves,int &move_count, int depth){
             else if (b[i][j] == PAWN_C)
                 score += 1;
             else if (b[i][j] == KING_P)
-                score -= 4;
+                score -= 8;
             else if (b[i][j] == HORSE_P)
                 score -= 3;
             else if (b[i][j] == BISHOP_P)
