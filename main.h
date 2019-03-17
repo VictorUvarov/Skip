@@ -7,11 +7,11 @@
 #include <iostream>
 #include <ctime>
 
-#define WIN 5000
-#define LOSE -5000
-#define MAX 20000
-#define MIN -20000
-#define TIMES_UP 10000
+#define WIN 500000
+#define LOSE -500000
+#define MAX 2000000
+#define MIN -2000000
+#define TIMES_UP 111111
 
 #define A 0
 #define B 1
@@ -60,17 +60,16 @@ const char HORSE_P = 'h';
 const char BISHOP_P = 'b';
 const char PAWN_P = 'p';
 
-const std::string KING_UNI_C = "\u265A";
-const std::string HORSE_UNI_C = "\u265E";
-const std::string BISHOP_UNI_C = "\u265D";
-const std::string PAWN_UNI_C = "\u265F";
+const char* KING_UNI_C = "\u265A";
+const char* HORSE_UNI_C = "\u265E";
+const char* BISHOP_UNI_C = "\u265D";
+const char* PAWN_UNI_C = "\u265F";
 
-const std::string KING_UNI_P = "\u2654";
-const std::string HORSE_UNI_P = "\u2658";
-const std::string BISHOP_UNI_P = "\u2657";
-const std::string PAWN_UNI_P = "\u2659";
-const std::string ROBOT = "\u1F91";
-const std::string DOT = "\u00B7";
+const char* KING_UNI_P = "\u2654";
+const char* HORSE_UNI_P = "\u2658";
+const char* BISHOP_UNI_P = "\u2657";
+const char* PAWN_UNI_P = "\u2659";
+const char* DOT = "\u00B7";
 
 bool IS_PLAYER_TURN = false;
 bool IS_COMPUTER_TURN = false;
@@ -99,8 +98,6 @@ void computerTurn();
 
 void checkGameOver();
 
-void updateNumberOfKings();
-
 void gameOver(int player, int reason);
 
 void printMoves(Move **moves, int left);
@@ -117,15 +114,17 @@ void printComputerMove(const Move &move);
 
 float timeDiff(clock_t begin_time);
 
-// Minimax
+// Mini max
 
 Move miniMax();
 
 int min(int depth, int maxDepth, int parent_best_score);
 
-int max(int depth, int maxDepth, int parent_best_score);
+int max(int depth, int max_depth, int parent_best_score);
 
-int evaluate();
+int evaluateMin(Move **moves,int &move_count, int depth);
+
+int evaluateMax(Move **moves,int &move_count, int depth);
 
 int checkForWinner();
 

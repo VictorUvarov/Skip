@@ -1,8 +1,8 @@
+#include <unistd.h>
 #include "main.h"
 
 int main() {
     setup();
-    displayBoard();
     play();
     return EXIT_SUCCESS;
 }
@@ -50,6 +50,7 @@ void play() {
     std::cout << "Who goes first? (1)Player (2)Computer\n";
     std::cout << "Choice: ";
     if (std::cin >> turn) {
+        displayBoard();
         if (turn == COMPUTER) {
             computerTurn();
             checkGameOver();
@@ -113,25 +114,10 @@ void computerTurn() {
 }
 
 void checkGameOver() {
-    updateNumberOfKings();
     if (PLAYER_KINGS == 0)
         gameOver(PLAYER, REASON_NO_KINGS_LEFT);
     if (COMPUTER_KINGS == 0)
         gameOver(COMPUTER, REASON_NO_KINGS_LEFT);
-}
-
-void updateNumberOfKings() {
-    int k_c = 0, k_p = 0;
-    for (int i = 0; i < BOARD_ROWS; i++) {
-        for (int j = 0; j < BOARD_COLS; j++) {
-            if (b[i][j] == KING_P)
-                k_p++;
-            if (b[i][j] == KING_C)
-                k_c++;
-        }
-    }
-    PLAYER_KINGS = k_p;
-    COMPUTER_KINGS = k_c;
 }
 
 void convertInput(Move *playerMove, const char *input) {
@@ -224,10 +210,10 @@ void allocateMoves(Move *moves[50]) {
 
 Move miniMax() {
     Move *computer_moves[MAX_MOVES];
-    Move *prevBestMove = new Move();
-    Move bestMove = {};
-    int score = 0, i = 0, d = 0, depth = 0, maxDepth = 1;
-    int bestScore = MIN;
+    Move *current_best_move = new Move();
+    Move best_move = Move();
+    int score = 0, i, d = 0, depth = 0, max_depth = 1;
+    int best_score = MIN;
     START_TIME = clock();
     allocateMoves(computer_moves);
 
@@ -238,37 +224,44 @@ Move miniMax() {
     while ((timeDiff(START_TIME)) < ALLOWED_TIME) {
         for (i = 0; i < COMPUTER_MOVES_LEFT; ++i) {
             movePiece(computer_moves[i], DONT_UNDO);
-            score = min(depth + 1, maxDepth + d, MIN);
+            score = min(depth + 1, max_depth + d, MIN);
             movePiece(computer_moves[i], UNDO);
-            if (score > bestScore) {
-                bestScore = score;
-                bestMove = *computer_moves[i];
+            if (score > best_score) {
+                best_score = score;
+                best_move = *computer_moves[i];
             }
         }
-        if (score == TIMES_UP) *prevBestMove = bestMove; // if early store last best
+        if (score == TIMES_UP) *current_best_move = best_move; // if early store last best
         if (score == MAX) break; // stop searching if win
-        d++;
+        d++; // increase the max depth
     }
-    std::cout << "dove down to depth " << maxDepth + i << " that turn\n";
-    if (score == TIMES_UP) bestMove = *prevBestMove; // if we break out early we want to return to last depths best
+    std::cout << "dove down to depth " << max_depth + i << " that turn\n";
+    if (score == TIMES_UP)
+        best_move = *current_best_move; // if we break out early we want to return to last depths best
     deallocateMoves(computer_moves);
-    return bestMove;
+    delete current_best_move;
+    return best_move;
 }
 
 int min(const int depth, const int maxDepth, const int parent_best_score) {
     if (checkForWinner() != 0)
         return checkForWinner();
-    if (depth == maxDepth)
-        return evaluate();
 
-    int bestScore = MAX, score;
     Move *moves[MAX_MOVES];
     allocateMoves(moves);
-    int size = generatePlayerMoves(moves);
+    int player_moves_count = generatePlayerMoves(moves);
 
-    for (int i = 0; i < size; ++i) {
+    if (depth == maxDepth)
+        return evaluateMin(moves,player_moves_count,depth);
+
+    int best_score = MAX, score;
+    int old_player_moves = PLAYER_MOVES_LEFT;
+    PLAYER_MOVES_LEFT = player_moves_count;
+
+    for (int i = 0; i < player_moves_count; ++i) {
         if (timeDiff(START_TIME) >= ALLOWED_TIME) {
             deallocateMoves(moves);
+            PLAYER_MOVES_LEFT = old_player_moves;
             return TIMES_UP;
         }
         movePiece(moves[i], DONT_UNDO);
@@ -276,82 +269,156 @@ int min(const int depth, const int maxDepth, const int parent_best_score) {
         movePiece(moves[i], UNDO);
         if (score == TIMES_UP) {
             deallocateMoves(moves);
+            PLAYER_MOVES_LEFT = old_player_moves;
             return TIMES_UP;
         }
         if (score < parent_best_score) {
             deallocateMoves(moves);
+            PLAYER_MOVES_LEFT = old_player_moves;
             return score;
         }
-        if (score < bestScore)
-            bestScore = score;
+        if (score < best_score)
+            best_score = score;
     }
     deallocateMoves(moves);
-    return bestScore;
+    PLAYER_MOVES_LEFT = old_player_moves;
+    return best_score;
 }
 
-int max(const int depth, const int maxDepth, const int parent_best_score) {
+int max(const int depth, const int max_depth, const int parent_best_score) {
     if (checkForWinner() != 0)
         return checkForWinner();
-    if (depth == maxDepth)
-        return evaluate();
 
-    int bestScore = MIN, score;
     Move *moves[MAX_MOVES];
     allocateMoves(moves);
-    int size = generateComputerMoves(moves);
+    int computer_moves_count = generateComputerMoves(moves);
 
-    for (int i = 0; i < size; ++i) {
+    if (depth == max_depth)
+        return evaluateMax(moves,computer_moves_count,depth);
+
+    int best_score = MIN, score;
+    int old_computer_moves = COMPUTER_MOVES_LEFT;
+    COMPUTER_MOVES_LEFT = computer_moves_count;
+
+    for (int i = 0; i < computer_moves_count; ++i) {
         if (timeDiff(START_TIME) >= ALLOWED_TIME) {
             deallocateMoves(moves);
+            COMPUTER_MOVES_LEFT = old_computer_moves;
             return TIMES_UP;
         }
         movePiece(moves[i], DONT_UNDO);
-        score = min(depth + 1, maxDepth, parent_best_score);
+        score = min(depth + 1, max_depth, parent_best_score);
         movePiece(moves[i], UNDO);
         if (score == TIMES_UP) {
             deallocateMoves(moves);
+            COMPUTER_MOVES_LEFT = old_computer_moves;
             return TIMES_UP;
         }
         if (score > parent_best_score) {
             deallocateMoves(moves);
+            COMPUTER_MOVES_LEFT = old_computer_moves;
             return score;
         }
-        if (score > bestScore) {
-            bestScore = score;
+        if (score > best_score) {
+            best_score = score;
         }
     }
     deallocateMoves(moves);
-    return bestScore;
+    COMPUTER_MOVES_LEFT = old_computer_moves;
+    return best_score;
 }
 
-int evaluate() {
-    int pieces = 0;
-    int piecesWeight = 0;
-    for (int i = 0; i < BOARD_ROWS; i++) {
-        for (int j = 0; j < BOARD_COLS; j++) {
-            if (islower(b[i][j]))
-                pieces--;
-            else if (isupper(b[i][j]))
-                pieces++;
-            else if (b[i][j] == KING_C)
-                piecesWeight += 4;
-            else if (b[i][j] == HORSE_C)
-                piecesWeight += 2;
-            else if (b[i][j] == BISHOP_C)
-                piecesWeight += 1;
-            else if (b[i][j] == KING_P)
-                piecesWeight -= 4;
-            else if (b[i][j] == HORSE_P)
-                piecesWeight -= 2;
-            else if (b[i][j] == BISHOP_P)
-                piecesWeight -= 1;
+int evaluateMax(Move **moves,int &move_count, int depth){
+    int king_row = 0 , king_col = 0, i;
+    // find computer's king location
+    for (i = 0; i < BOARD_ROWS; ++i) {
+        for (int j = 0; j < BOARD_COLS; ++j) {
+            if(b[i][j] == KING_C){
+                king_row = i;
+                king_col = j;
+            }
         }
     }
-    return pieces + piecesWeight;
+
+    // find move 'to' location that matches computer king location
+    for (i = 0; i < move_count; ++i) {
+        if(moves[i]->move[2] == king_row && moves[i]->move[3] == king_col){
+            return WIN - depth;
+        }
+    }
+
+    // we didn't find a move that kills a king, so just evaluate pieces
+    int score = 0;
+    for (i = 0; i < BOARD_ROWS; i++) {
+        for (int j = 0; j < BOARD_COLS; j++) {
+            if (b[i][j] == KING_C)
+                score += 4;
+            else if (b[i][j] == HORSE_C)
+                score += 3;
+            else if (b[i][j] == BISHOP_C)
+                score += 2;
+            else if (b[i][j] == PAWN_C)
+                score += 1;
+            else if (b[i][j] == KING_P)
+                score -= 4;
+            else if (b[i][j] == HORSE_P)
+                score -= 3;
+            else if (b[i][j] == BISHOP_P)
+                score -= 2;
+            else if (b[i][j] == PAWN_P)
+                score -= 1;
+        }
+    }
+    return score - depth;
+}
+
+int evaluateMin(Move **moves,int &move_count, int depth){
+    int king_row = 0 , king_col = 0, i;
+    // find computer's king location
+    for (i = 0; i < BOARD_ROWS; ++i) {
+        for (int j = 0; j < BOARD_COLS; ++j) {
+            if(b[i][j] == KING_P){
+                king_row = i;
+                king_col = j;
+            }
+        }
+    }
+
+    // find move 'to' location that matches computer king location
+    for (i = 0; i < move_count; ++i) {
+        if(moves[i]->move[2] == king_row && moves[i]->move[3] == king_col){
+            return LOSE + depth;
+        }
+    }
+
+    // we didn't find a move that kills a king, so just evaluate pieces
+    int score = 0;
+    for (i = 0; i < BOARD_ROWS; i++) {
+        for (int j = 0; j < BOARD_COLS; j++) {
+            if (b[i][j] == KING_C)
+                score += 4;
+            else if (b[i][j] == HORSE_C)
+                score += 3;
+            else if (b[i][j] == BISHOP_C)
+                score += 2;
+            else if (b[i][j] == PAWN_C)
+                score += 1;
+            else if (b[i][j] == KING_P)
+                score -= 4;
+            else if (b[i][j] == HORSE_P)
+                score -= 3;
+            else if (b[i][j] == BISHOP_P)
+                score -= 2;
+            else if (b[i][j] == PAWN_P)
+                score -= 1;
+        }
+    }
+    return score + depth;
 }
 
 int checkForWinner() {
-    updateNumberOfKings();
+//    std::cout << "P Kings: " << PLAYER_KINGS << " C Kings: " << COMPUTER_KINGS << " P moves left: " << PLAYER_MOVES_LEFT
+//              << " C moves left: " << COMPUTER_MOVES_LEFT << std::endl;
     if (PLAYER_MOVES_LEFT == 0)
         return WIN;
     if (PLAYER_KINGS == 0)
@@ -368,6 +435,10 @@ void movePiece(Move *move, const bool undo) {
     if (undo) {
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
         b[move->move[2]][move->move[3]] = move->pieceCaptured;
+        if (move->pieceCaptured == KING_P)
+            PLAYER_KINGS++;
+        else if (move->pieceCaptured == KING_C)
+            COMPUTER_KINGS++;
         if (move->shouldChange) {
             temp = move->newIdentity;
             b[move->move[0]][move->move[1]] = move->newIdentity;
@@ -377,6 +448,10 @@ void movePiece(Move *move, const bool undo) {
         temp = b[move->move[0]][move->move[1]];
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
         b[move->move[2]][move->move[3]] = temp;
+        if (move->pieceCaptured == KING_P)
+            PLAYER_KINGS--;
+        else if (move->pieceCaptured == KING_C)
+            COMPUTER_KINGS--;
         if (move->capture)
             b[move->move[0]][move->move[1]] = '-';
         if (move->shouldChange) {
