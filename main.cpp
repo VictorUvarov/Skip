@@ -353,9 +353,13 @@ int evaluateMax(Move **moves,int &move_count, int depth){
     }
 
     // we didn't find a move that kills a king, so just evaluate pieces
-    int score = 0;
+    int score = 0, pieces = 0;
     for (i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
+            if(islower(b[i][j]))
+                pieces--;
+            if(isupper(b[i][j]))
+                pieces++;
             if (b[i][j] == KING_C)
                 score += 8;
             else if (b[i][j] == HORSE_C)
@@ -374,7 +378,7 @@ int evaluateMax(Move **moves,int &move_count, int depth){
                 score -= 1;
         }
     }
-    return score - depth;
+    return score + pieces - depth;
 }
 
 int evaluateMin(Move **moves,int &move_count, int depth){
@@ -402,9 +406,13 @@ int evaluateMin(Move **moves,int &move_count, int depth){
     }
 
     // we didn't find a move that kills a king, so just evaluate pieces
-    int score = 0;
+    int score = 0, pieces = 0;
     for (i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
+            if(islower(b[i][j]))
+                pieces--;
+            if(isupper(b[i][j]))
+                pieces++;
             if (b[i][j] == KING_C)
                 score += 8;
             else if (b[i][j] == HORSE_C)
@@ -423,7 +431,7 @@ int evaluateMin(Move **moves,int &move_count, int depth){
                 score -= 1;
         }
     }
-    return score + depth;
+    return score + pieces + depth;
 }
 
 int checkForWinner() {
@@ -453,6 +461,7 @@ void movePiece(Move *move, const bool undo) {
             temp = move->newIdentity;
             b[move->move[0]][move->move[1]] = move->newIdentity;
             move->newIdentity = temp;
+            std::cout << "piece restored" << std::endl;
         }
     } else {
         temp = b[move->move[0]][move->move[1]];
@@ -465,6 +474,7 @@ void movePiece(Move *move, const bool undo) {
         if (move->capture)
             b[move->move[0]][move->move[1]] = '-';
         if (move->shouldChange) {
+            std::cout << "piece changed" << std::endl;
             b[move->move[2]][move->move[3]] = move->newIdentity;
             move->newIdentity = temp;
         }
@@ -542,6 +552,8 @@ bool shouldChangeIdentity(Move *move) {
     int from_quad = whatQuadrant(move->move[0], move->move[1]);
     int to_quad = whatQuadrant(move->move[2], move->move[3]);
 
+    // Q2 | Q1
+    // Q3 | Q4
     if (from_quad == 1 && (to_quad == 2 || to_quad == 3))
         return true;
     if (from_quad == 2 && (to_quad == 1 || to_quad == 4))
@@ -621,7 +633,7 @@ int generateComputerMoves(Move **moves) {
     return numberOfMoves;
 }
 
-int generatePawnMoves(Move **moves, int index, const bool player, const int row, const int col) {
+int generatePawnMoves(Move **moves, int &index, const bool player, const int row, const int col) {
     if (player) {
         //forward
         if (moveInBounds(row - 1, col) && b[row - 1][col] == '-') {
@@ -693,7 +705,7 @@ int generatePawnMoves(Move **moves, int index, const bool player, const int row,
     return index;
 }
 
-int generateKingMoves(Move **moves, int index, const bool player, const int row, const int col) {
+int generateKingMoves(Move **moves, int &index, const bool player, const int row, const int col) {
     if (player) {
         // right king
         if (moveInBounds(row, col + 1) && b[row][col + 1] == '-' && whatQuadrant(row, col) == 4) {
@@ -781,7 +793,7 @@ int generateKingMoves(Move **moves, int index, const bool player, const int row,
     return index;
 }
 
-int generateHorseMoves(Move **moves, int index, const bool player, const int row, const int col) {
+int generateHorseMoves(Move **moves, int &index, const bool player, const int row, const int col) {
     if (player) {
         // 2 left 1 up (col - 2, row - 1)
         if (moveInBounds(row - 1, col - 2) &&
@@ -1039,7 +1051,7 @@ int generateHorseMoves(Move **moves, int index, const bool player, const int row
     return index;
 }
 
-int generateBishopMoves(Move **moves, int index, const bool player, const int row, const int col) {
+int generateBishopMoves(Move **moves, int &index, const bool player, const int row, const int col) {
     if (player) {
         //forward right diagonal
         int i = 1;

@@ -146,12 +146,12 @@ int generatePlayerMoves(Move **moves);
 
 int generateComputerMoves(Move **moves);
 
-int generatePawnMoves(Move **moves, int index, bool player, int row, int col);
+int generatePawnMoves(Move **moves, int &index, bool player, int row, int col);
 
-int generateKingMoves(Move **moves, int index, bool player, int row, int col);
+int generateKingMoves(Move **moves, int &index, bool player, int row, int col);
 
-int generateHorseMoves(Move **moves, int index, bool player, int row, int col);
+int generateHorseMoves(Move **moves, int &index, bool player, int row, int col);
 
-int generateBishopMoves(Move **moves, int index, bool player, int row, int col);
+int generateBishopMoves(Move **moves, int &index, bool player, int row, int col);
 
 #endif //SKIP_MAIN_H
