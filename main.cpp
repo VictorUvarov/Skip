@@ -69,8 +69,8 @@ void playerTurn() {
     IS_PLAYER_TURN = true;
     IS_COMPUTER_TURN = false;
     Move *moves[MAX_MOVES];
-    Move *playerMove = new Move;
-    bool legalMove = false;
+    Move *player_move = new Move;
+    bool legal_move = false;
     char input[5];
 
     allocateMoves(moves);
@@ -83,22 +83,22 @@ void playerTurn() {
     do {
         std::cout << "Enter move: ";
         if (std::cin >> input) {
-            convertInput(playerMove, input);
-            legalMove = isValidMove(moves, playerMove);
+            convertInput(player_move, input);
+            legal_move = isValidMove(moves, player_move);
 
-            if (legalMove)
-                movePiece(playerMove, DONT_UNDO);
+            if (legal_move)
+                movePiece(player_move, DONT_UNDO);
             else {
                 displayBoard();
                 std::cout << "Illegal move, ";
                 std::cout << "please review list of legal moves and try again.\n";
             }
         }
-    } while (!legalMove);
+    } while (!legal_move);
 
     // Free up unused memory
     deallocateMoves(moves);
-    delete playerMove;
+    delete player_move;
     displayBoard();
 }
 
@@ -120,11 +120,11 @@ void checkGameOver() {
         gameOver(COMPUTER, REASON_NO_KINGS_LEFT);
 }
 
-void convertInput(Move *playerMove, const char *input) {
-    playerMove->move[0] = '6' - input[1];
-    playerMove->move[1] = toupper(input[0]) - 'A';
-    playerMove->move[2] = '6' - input[3];
-    playerMove->move[3] = toupper(input[2]) - 'A';
+void convertInput(Move *player_move, const char *input) {
+    player_move->move[0] = '6' - input[1];
+    player_move->move[1] = toupper(input[0]) - 'A';
+    player_move->move[2] = '6' - input[3];
+    player_move->move[3] = toupper(input[2]) - 'A';
 }
 
 void printComputerMove(const Move &move) {
@@ -141,22 +141,22 @@ void printComputerMove(const Move &move) {
               << ")" << std::endl;
 }
 
-bool isValidMove(Move **moves, Move *playerMove) {
-    bool legalMove = false;
+bool isValidMove(Move **moves, Move *player_move) {
+    bool legal_move = false;
     for (int i = 0; i < PLAYER_MOVES_LEFT; i++) {
-        if (moves[i]->move[0] == playerMove->move[0] &&
-            moves[i]->move[1] == playerMove->move[1] &&
-            moves[i]->move[2] == playerMove->move[2] &&
-            moves[i]->move[3] == playerMove->move[3]) {
-            playerMove->capture = moves[i]->capture;
-            playerMove->pieceCaptured = moves[i]->pieceCaptured;
-            playerMove->shouldChange = moves[i]->shouldChange;
-            playerMove->newIdentity = moves[i]->newIdentity;
-            legalMove = true;
+        if (moves[i]->move[0] == player_move->move[0] &&
+            moves[i]->move[1] == player_move->move[1] &&
+            moves[i]->move[2] == player_move->move[2] &&
+            moves[i]->move[3] == player_move->move[3]) {
+            player_move->capture = moves[i]->capture;
+            player_move->piece_captured = moves[i]->piece_captured;
+            player_move->should_change = moves[i]->should_change;
+            player_move->new_identity = moves[i]->new_identity;
+            legal_move = true;
             break;
         }
     }
-    return legalMove;
+    return legal_move;
 }
 
 void printMoves(Move **moves, const int size) {
@@ -243,7 +243,7 @@ Move miniMax() {
     return best_move;
 }
 
-int min(const int depth, const int maxDepth, const int parent_best_score) {
+int min(const int depth, const int max_depth, const int parent_best_score) {
     if (checkForWinner() != 0)
         return checkForWinner();
 
@@ -251,7 +251,7 @@ int min(const int depth, const int maxDepth, const int parent_best_score) {
     allocateMoves(moves);
     int player_moves_count = generatePlayerMoves(moves);
 
-    if (depth == maxDepth)
+    if (depth == max_depth)
         return evaluateMin(moves,player_moves_count,depth);
 
     int best_score = MAX, score;
@@ -265,7 +265,7 @@ int min(const int depth, const int maxDepth, const int parent_best_score) {
             return TIMES_UP;
         }
         movePiece(moves[i], DONT_UNDO);
-        score = max(depth + 1, maxDepth, parent_best_score);
+        score = max(depth + 1, max_depth, parent_best_score);
         movePiece(moves[i], UNDO);
         if (score == TIMES_UP) {
             deallocateMoves(moves);
@@ -452,31 +452,29 @@ void movePiece(Move *move, const bool undo) {
     char temp;
     if (undo) {
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
-        b[move->move[2]][move->move[3]] = move->pieceCaptured;
-        if (move->pieceCaptured == KING_P)
+        b[move->move[2]][move->move[3]] = move->piece_captured;
+        if (move->piece_captured == KING_P)
             PLAYER_KINGS++;
-        else if (move->pieceCaptured == KING_C)
+        else if (move->piece_captured == KING_C)
             COMPUTER_KINGS++;
-        if (move->shouldChange) {
-            temp = move->newIdentity;
-            b[move->move[0]][move->move[1]] = move->newIdentity;
-            move->newIdentity = temp;
-            std::cout << "piece restored" << std::endl;
+        if (move->should_change) {
+            temp = move->new_identity;
+            b[move->move[0]][move->move[1]] = move->new_identity;
+            move->new_identity = temp;
         }
     } else {
         temp = b[move->move[0]][move->move[1]];
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
         b[move->move[2]][move->move[3]] = temp;
-        if (move->pieceCaptured == KING_P)
+        if (move->piece_captured == KING_P)
             PLAYER_KINGS--;
-        else if (move->pieceCaptured == KING_C)
+        else if (move->piece_captured == KING_C)
             COMPUTER_KINGS--;
         if (move->capture)
             b[move->move[0]][move->move[1]] = '-';
-        if (move->shouldChange) {
-            std::cout << "piece changed" << std::endl;
-            b[move->move[2]][move->move[3]] = move->newIdentity;
-            move->newIdentity = temp;
+        if (move->should_change) {
+            b[move->move[2]][move->move[3]] = move->new_identity;
+            move->new_identity = temp;
         }
     }
 }
@@ -582,55 +580,55 @@ int whatQuadrant(const int row, const int col) {
 int generatePlayerMoves(Move **moves) {
     // keeps track of number of moves
     // and the current index for moves
-    int numberOfMoves = 0;
+    int move_count = 0;
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
             switch (b[i][j]) {
                 case PAWN_P:
-                    numberOfMoves = generatePawnMoves(moves, numberOfMoves, true, i, j);
+                    move_count = generatePawnMoves(moves, move_count, true, i, j);
                     break;
                 case KING_P:
-                    numberOfMoves = generateKingMoves(moves, numberOfMoves, true, i, j);
+                    move_count = generateKingMoves(moves, move_count, true, i, j);
                     break;
                 case HORSE_P:
-                    numberOfMoves = generateHorseMoves(moves, numberOfMoves, true, i, j);
+                    move_count = generateHorseMoves(moves, move_count, true, i, j);
                     break;
                 case BISHOP_P:
-                    numberOfMoves = generateBishopMoves(moves, numberOfMoves, true, i, j);
+                    move_count = generateBishopMoves(moves, move_count, true, i, j);
                     break;
                 default:
                     break;
             }
         }
     }
-    return numberOfMoves;
+    return move_count;
 }
 
 int generateComputerMoves(Move **moves) {
     // keeps track of number of moves
     // and the current index for moves
-    int numberOfMoves = 0;
+    int move_count = 0;
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
             switch (b[i][j]) {
                 case PAWN_C:
-                    numberOfMoves = generatePawnMoves(moves, numberOfMoves, false, i, j);
+                    move_count = generatePawnMoves(moves, move_count, false, i, j);
                     break;
                 case KING_C:
-                    numberOfMoves = generateKingMoves(moves, numberOfMoves, false, i, j);
+                    move_count = generateKingMoves(moves, move_count, false, i, j);
                     break;
                 case HORSE_C:
-                    numberOfMoves = generateHorseMoves(moves, numberOfMoves, false, i, j);
+                    move_count = generateHorseMoves(moves, move_count, false, i, j);
                     break;
                 case BISHOP_C:
-                    numberOfMoves = generateBishopMoves(moves, numberOfMoves, false, i, j);
+                    move_count = generateBishopMoves(moves, move_count, false, i, j);
                     break;
                 default:
                     break;
             }
         }
     }
-    return numberOfMoves;
+    return move_count;
 }
 
 int generatePawnMoves(Move **moves, int &index, const bool player, const int row, const int col) {
@@ -642,7 +640,7 @@ int generatePawnMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row - 1;
             moves[index]->move[3] = col;
             moves[index]->capture = false;
-            moves[index]->pieceCaptured = b[row - 1][col];
+            moves[index]->piece_captured = b[row - 1][col];
             index++;
         }
         //left capture
@@ -653,7 +651,7 @@ int generatePawnMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row - 1;
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row - 1][col - 1];
+            moves[index]->piece_captured = b[row - 1][col - 1];
             index++;
         }
         //right capture
@@ -664,7 +662,7 @@ int generatePawnMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row - 1;
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row - 1][col + 1];
+            moves[index]->piece_captured = b[row - 1][col + 1];
             index++;
         }
     } else // if(computer)
@@ -676,7 +674,7 @@ int generatePawnMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row + 1;
             moves[index]->move[3] = col;
             moves[index]->capture = false;
-            moves[index]->pieceCaptured = b[row + 1][col];
+            moves[index]->piece_captured = b[row + 1][col];
             index++;
         }
         //left capture
@@ -687,7 +685,7 @@ int generatePawnMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row + 1;
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row + 1][col - 1];
+            moves[index]->piece_captured = b[row + 1][col - 1];
             index++;
         }
         //right capture
@@ -698,7 +696,7 @@ int generatePawnMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row + 1;
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row + 1][col + 1];
+            moves[index]->piece_captured = b[row + 1][col + 1];
             index++;
         }
     }
@@ -714,7 +712,7 @@ int generateKingMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row;
             moves[index]->move[3] = col + 1;
             moves[index]->capture = false;
-            moves[index]->pieceCaptured = b[row][col + 1];
+            moves[index]->piece_captured = b[row][col + 1];
             index++;
         }
         // right king right capture
@@ -724,7 +722,7 @@ int generateKingMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row;
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row][col + 1];
+            moves[index]->piece_captured = b[row][col + 1];
             index++;
         }
         // left king
@@ -734,7 +732,7 @@ int generateKingMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row;
             moves[index]->move[3] = col - 1;
             moves[index]->capture = false;
-            moves[index]->pieceCaptured = b[row][col - 1];
+            moves[index]->piece_captured = b[row][col - 1];
             index++;
         }
         // left king left capture
@@ -744,7 +742,7 @@ int generateKingMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row;
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row][col - 1];
+            moves[index]->piece_captured = b[row][col - 1];
             index++;
         }
     } else // if(computer)
@@ -756,7 +754,7 @@ int generateKingMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row;
             moves[index]->move[3] = col - 1;
             moves[index]->capture = false;
-            moves[index]->pieceCaptured = b[row][col - 1];
+            moves[index]->piece_captured = b[row][col - 1];
             index++;
         }
         // right king right capture
@@ -766,7 +764,7 @@ int generateKingMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row;
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row][col - 1];
+            moves[index]->piece_captured = b[row][col - 1];
             index++;
         }
         // left king
@@ -776,7 +774,7 @@ int generateKingMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row;
             moves[index]->move[3] = col + 1;
             moves[index]->capture = false;
-            moves[index]->pieceCaptured = b[row][col + 1];
+            moves[index]->piece_captured = b[row][col + 1];
             index++;
         }
         // left king left capture
@@ -786,7 +784,7 @@ int generateKingMoves(Move **moves, int &index, const bool player, const int row
             moves[index]->move[2] = row;
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row][col + 1];
+            moves[index]->piece_captured = b[row][col + 1];
             index++;
         }
     }
@@ -802,11 +800,11 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[1] = col;
             moves[index]->move[2] = row - 1;
             moves[index]->move[3] = col - 2;
-            moves[index]->pieceCaptured = b[row - 1][col - 2];
+            moves[index]->piece_captured = b[row - 1][col - 2];
             moves[index]->capture = isupper(b[row - 1][col - 2]) != 0;
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_P;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_P;
             }
             index++;
         }
@@ -817,11 +815,11 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[1] = col;
             moves[index]->move[2] = row - 1;
             moves[index]->move[3] = col + 2;
-            moves[index]->pieceCaptured = b[row - 1][col + 2];
+            moves[index]->piece_captured = b[row - 1][col + 2];
             moves[index]->capture = isupper(b[row - 1][col + 2]) != 0;
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_P;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_P;
             }
             index++;
         }
@@ -832,11 +830,11 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[1] = col;
             moves[index]->move[2] = row - 2;
             moves[index]->move[3] = col - 1;
-            moves[index]->pieceCaptured = b[row - 2][col - 1];
+            moves[index]->piece_captured = b[row - 2][col - 1];
             moves[index]->capture = isupper(b[row - 2][col - 1]) != 0;
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_P;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_P;
             }
             index++;
         }
@@ -847,11 +845,11 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[1] = col;
             moves[index]->move[2] = row - 2;
             moves[index]->move[3] = col + 1;
-            moves[index]->pieceCaptured = b[row - 2][col + 1];
+            moves[index]->piece_captured = b[row - 2][col + 1];
             moves[index]->capture = isupper(b[row - 2][col + 1]) != 0;
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_P;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_P;
             }
             index++;
         }
@@ -865,10 +863,10 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[2] = row + 1;
             moves[index]->move[3] = col - 2;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row + 1][col - 2];
+            moves[index]->piece_captured = b[row + 1][col - 2];
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_P;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_P;
             }
             index++;
         }
@@ -881,10 +879,10 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[2] = row + 1;
             moves[index]->move[3] = col + 2;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row + 1][col + 2];
+            moves[index]->piece_captured = b[row + 1][col + 2];
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_P;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_P;
             }
             index++;
         }
@@ -897,10 +895,10 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[2] = row + 2;
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row + 2][col - 1];
+            moves[index]->piece_captured = b[row + 2][col - 1];
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_P;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_P;
             }
             index++;
         }
@@ -913,10 +911,10 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[2] = row + 2;
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row + 2][col + 1];
+            moves[index]->piece_captured = b[row + 2][col + 1];
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_P;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_P;
             }
             index++;
         }
@@ -929,11 +927,11 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[1] = col;
             moves[index]->move[2] = row + 1;
             moves[index]->move[3] = col - 2;
-            moves[index]->pieceCaptured = b[row + 1][col - 2];
+            moves[index]->piece_captured = b[row + 1][col - 2];
             moves[index]->capture = islower(b[row + 1][col - 2]) != 0;
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_C;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_C;
             }
             index++;
         }
@@ -944,11 +942,11 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[1] = col;
             moves[index]->move[2] = row + 1;
             moves[index]->move[3] = col + 2;
-            moves[index]->pieceCaptured = b[row + 1][col + 2];
+            moves[index]->piece_captured = b[row + 1][col + 2];
             moves[index]->capture = islower(b[row + 1][col + 2]) != 0;
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_C;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_C;
             }
             index++;
         }
@@ -959,11 +957,11 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[1] = col;
             moves[index]->move[2] = row + 2;
             moves[index]->move[3] = col - 1;
-            moves[index]->pieceCaptured = b[row + 2][col - 1];
+            moves[index]->piece_captured = b[row + 2][col - 1];
             moves[index]->capture = islower(b[row + 2][col - 1]) != 0;
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_C;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_C;
             }
             index++;
         }
@@ -974,11 +972,11 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[1] = col;
             moves[index]->move[2] = row + 2;
             moves[index]->move[3] = col + 1;
-            moves[index]->pieceCaptured = b[row + 2][col + 1];
+            moves[index]->piece_captured = b[row + 2][col + 1];
             moves[index]->capture = islower(b[row + 2][col + 1]) != 0;
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_C;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_C;
             }
             index++;
         }
@@ -992,10 +990,10 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[2] = row - 1;
             moves[index]->move[3] = col - 2;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row - 1][col - 2];
+            moves[index]->piece_captured = b[row - 1][col - 2];
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_C;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_C;
             }
             index++;
         }
@@ -1008,10 +1006,10 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[2] = row - 1;
             moves[index]->move[3] = col + 2;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row - 1][col + 2];
+            moves[index]->piece_captured = b[row - 1][col + 2];
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_C;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_C;
             }
             index++;
         }
@@ -1024,10 +1022,10 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[2] = row - 2;
             moves[index]->move[3] = col - 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row - 2][col - 1];
+            moves[index]->piece_captured = b[row - 2][col - 1];
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_C;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_C;
             }
             index++;
         }
@@ -1040,10 +1038,10 @@ int generateHorseMoves(Move **moves, int &index, const bool player, const int ro
             moves[index]->move[2] = row - 2;
             moves[index]->move[3] = col + 1;
             moves[index]->capture = true;
-            moves[index]->pieceCaptured = b[row - 2][col + 1];
+            moves[index]->piece_captured = b[row - 2][col + 1];
             if (shouldChangeIdentity(moves[index])) {
-                moves[index]->shouldChange = true;
-                moves[index]->newIdentity = BISHOP_C;
+                moves[index]->should_change = true;
+                moves[index]->new_identity = BISHOP_C;
             }
             index++;
         }
@@ -1061,10 +1059,10 @@ int generateBishopMoves(Move **moves, int &index, const bool player, const int r
                 moves[index]->move[1] = col;
                 moves[index]->move[2] = row - i;
                 moves[index]->move[3] = col + i;
-                moves[index]->pieceCaptured = b[row - i][col + i];
+                moves[index]->piece_captured = b[row - i][col + i];
                 if (shouldChangeIdentity(moves[index])) {
-                    moves[index]->shouldChange = true;
-                    moves[index]->newIdentity = HORSE_P;
+                    moves[index]->should_change = true;
+                    moves[index]->new_identity = HORSE_P;
                 }
                 if (isupper(b[row - i][col + i])) {
                     moves[index]->capture = true;
@@ -1086,10 +1084,10 @@ int generateBishopMoves(Move **moves, int &index, const bool player, const int r
                 moves[index]->move[1] = col;
                 moves[index]->move[2] = row - i;
                 moves[index]->move[3] = col - i;
-                moves[index]->pieceCaptured = b[row - i][col - i];
+                moves[index]->piece_captured = b[row - i][col - i];
                 if (shouldChangeIdentity(moves[index])) {
-                    moves[index]->shouldChange = true;
-                    moves[index]->newIdentity = HORSE_P;
+                    moves[index]->should_change = true;
+                    moves[index]->new_identity = HORSE_P;
                 }
                 if (isupper(b[row - i][col - i])) {
                     moves[index]->capture = true;
@@ -1113,10 +1111,10 @@ int generateBishopMoves(Move **moves, int &index, const bool player, const int r
                 moves[index]->move[2] = row + i;
                 moves[index]->move[3] = col + i;
                 moves[index]->capture = true;
-                moves[index]->pieceCaptured = b[row + i][col + i];
+                moves[index]->piece_captured = b[row + i][col + i];
                 if (shouldChangeIdentity(moves[index])) {
-                    moves[index]->shouldChange = true;
-                    moves[index]->newIdentity = HORSE_P;
+                    moves[index]->should_change = true;
+                    moves[index]->new_identity = HORSE_P;
                 }
                 index++;
                 break;
@@ -1134,10 +1132,10 @@ int generateBishopMoves(Move **moves, int &index, const bool player, const int r
                 moves[index]->move[2] = row + i;
                 moves[index]->move[3] = col - i;
                 moves[index]->capture = true;
-                moves[index]->pieceCaptured = b[row + i][col - i];
+                moves[index]->piece_captured = b[row + i][col - i];
                 if (shouldChangeIdentity(moves[index])) {
-                    moves[index]->shouldChange = true;
-                    moves[index]->newIdentity = HORSE_P;
+                    moves[index]->should_change = true;
+                    moves[index]->new_identity = HORSE_P;
                 }
                 index++;
                 break;
@@ -1155,10 +1153,10 @@ int generateBishopMoves(Move **moves, int &index, const bool player, const int r
                 moves[index]->move[1] = col;
                 moves[index]->move[2] = row + i;
                 moves[index]->move[3] = col - i;
-                moves[index]->pieceCaptured = b[row + i][col - i];
+                moves[index]->piece_captured = b[row + i][col - i];
                 if (shouldChangeIdentity(moves[index])) {
-                    moves[index]->shouldChange = true;
-                    moves[index]->newIdentity = HORSE_C;
+                    moves[index]->should_change = true;
+                    moves[index]->new_identity = HORSE_C;
                 }
                 if (islower(b[row + i][col - i])) {
                     moves[index]->capture = true;
@@ -1181,10 +1179,10 @@ int generateBishopMoves(Move **moves, int &index, const bool player, const int r
                 moves[index]->move[1] = col;
                 moves[index]->move[2] = row + i;
                 moves[index]->move[3] = col + i;
-                moves[index]->pieceCaptured = b[row + i][col + i];
+                moves[index]->piece_captured = b[row + i][col + i];
                 if (shouldChangeIdentity(moves[index])) {
-                    moves[index]->shouldChange = true;
-                    moves[index]->newIdentity = HORSE_C;
+                    moves[index]->should_change = true;
+                    moves[index]->new_identity = HORSE_C;
                 }
                 if (islower(b[row + i][col + i])) {
                     moves[index]->capture = true;
@@ -1209,10 +1207,10 @@ int generateBishopMoves(Move **moves, int &index, const bool player, const int r
                 moves[index]->move[2] = row - i;
                 moves[index]->move[3] = col + i;
                 moves[index]->capture = true;
-                moves[index]->pieceCaptured = b[row - i][col + i];
+                moves[index]->piece_captured = b[row - i][col + i];
                 if (shouldChangeIdentity(moves[index])) {
-                    moves[index]->shouldChange = true;
-                    moves[index]->newIdentity = HORSE_C;
+                    moves[index]->should_change = true;
+                    moves[index]->new_identity = HORSE_C;
                 }
                 index++;
                 break;
@@ -1230,10 +1228,10 @@ int generateBishopMoves(Move **moves, int &index, const bool player, const int r
                 moves[index]->move[2] = row - i;
                 moves[index]->move[3] = col - i;
                 moves[index]->capture = true;
-                moves[index]->pieceCaptured = b[row - i][col - i];
+                moves[index]->piece_captured = b[row - i][col - i];
                 if (shouldChangeIdentity(moves[index])) {
-                    moves[index]->shouldChange = true;
-                    moves[index]->newIdentity = HORSE_C;
+                    moves[index]->should_change = true;
+                    moves[index]->new_identity = HORSE_C;
                 }
                 index++;
                 break;

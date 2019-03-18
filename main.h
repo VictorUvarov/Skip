@@ -83,9 +83,9 @@ struct Move {
     // move[3] = to col
     int move[4];
     bool capture;
-    char pieceCaptured;
-    bool shouldChange;
-    char newIdentity;
+    char piece_captured;
+    bool should_change;
+    char new_identity;
 };
 
 void setup();
@@ -102,13 +102,13 @@ void gameOver(int player, int reason);
 
 void printMoves(Move **moves, int left);
 
-bool isValidMove(Move **moves, Move *move);
+bool isValidMove(Move **moves, Move *player_move);
 
 void allocateMoves(Move *moves[50]);
 
 void deallocateMoves(Move *moves[50]);
 
-void convertInput(Move *playerMove, const char *input);
+void convertInput(Move *player_move, const char *input);
 
 void printComputerMove(const Move &move);
 
@@ -118,7 +118,7 @@ float timeDiff(clock_t begin_time);
 
 Move miniMax();
 
-int min(int depth, int maxDepth, int parent_best_score);
+int min(int depth, int max_depth, int parent_best_score);
 
 int max(int depth, int max_depth, int parent_best_score);
 
