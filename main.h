@@ -85,7 +85,9 @@ struct Move {
     bool capture;
     char piece_captured;
     bool should_change;
-    char new_identity;
+    // identity[0] = original identity
+    // identity[1] = new identity
+    char identity[2];
 };
 
 void setup();
