@@ -341,10 +341,10 @@ int max(const int depth, const int max_depth, const int parent_best_score) {
 int evaluateMax(Move **moves,int &move_count, int depth){
     int king_row[2], king_col[2];
     int i, p = 0;
-    // find computer's king location
+    // find Players's king locations
     for (i = 0; i < BOARD_ROWS; ++i) {
         for (int j = 0; j < BOARD_COLS; ++j) {
-            if(b[i][j] == KING_C){
+            if(b[i][j] == KING_P){
                 king_row[p] = i;
                 king_col[p] = j;
                 p++;
@@ -397,7 +397,7 @@ int evaluateMin(Move **moves,int &move_count, int depth){
     // find computer's king locations
     for (i = 0; i < BOARD_ROWS; ++i) {
         for (int j = 0; j < BOARD_COLS; ++j) {
-            if(b[i][j] == KING_P){
+            if(b[i][j] == KING_C){
                 king_row[p] = i;
                 king_col[p] = j;
                 p++;
