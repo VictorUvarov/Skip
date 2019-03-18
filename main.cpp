@@ -111,10 +111,6 @@ void computerTurn() {
     printComputerMove(move);
     movePiece(&move, DONT_UNDO);
     displayBoard();
-    movePiece(&move, UNDO);
-    displayBoard();
-    movePiece(&move, DONT_UNDO);
-    displayBoard();
 }
 
 void checkGameOver() {
