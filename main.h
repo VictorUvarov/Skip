@@ -40,8 +40,6 @@ const bool DONT_UNDO = false;
 const int REASON_NO_MOVES_LEFT = 0;
 const int REASON_NO_KINGS_LEFT = 1;
 
-int PLAYER_KINGS;
-int COMPUTER_KINGS;
 int PLAYER_MOVES_LEFT = 1;
 int COMPUTER_MOVES_LEFT = 1;
 

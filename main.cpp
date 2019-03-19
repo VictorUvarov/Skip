@@ -8,8 +8,6 @@ int main() {
 }
 
 void setup() {
-    PLAYER_KINGS = 2;
-    COMPUTER_KINGS = 2;
     int i, j;
     for (i = 0; i < BOARD_ROWS; i++) {
         for (j = 0; j < BOARD_COLS; j++)
@@ -114,10 +112,11 @@ void computerTurn() {
 }
 
 void checkGameOver() {
-    if (PLAYER_KINGS == 0)
-        gameOver(PLAYER, REASON_NO_KINGS_LEFT);
-    if (COMPUTER_KINGS == 0)
-        gameOver(COMPUTER, REASON_NO_KINGS_LEFT);
+    int val = checkForWinner();
+    if(val == WIN)
+        gameOver(PLAYER,REASON_NO_KINGS_LEFT);
+    if(val == LOSE)
+        gameOver(COMPUTER,REASON_NO_KINGS_LEFT);
 }
 
 void convertInput(Move *player_move, const char *input) {
@@ -402,16 +401,19 @@ int evaluateMin(const int depth){
 }
 
 int checkForWinner() {
-//    std::cout << "P Kings: " << PLAYER_KINGS << " C Kings: " << COMPUTER_KINGS << " P moves left: " << PLAYER_MOVES_LEFT
-//              << " C moves left: " << COMPUTER_MOVES_LEFT << std::endl;
-    if (PLAYER_MOVES_LEFT == 0)
-        return WIN;
-    if (PLAYER_KINGS == 0)
-        return WIN;
-    if (COMPUTER_MOVES_LEFT == 0)
+    int kings_c = 0, kings_p = 0;
+    for (int i = 0; i < BOARD_ROWS; ++i) {
+        for (int j = 0; j < BOARD_COLS; ++j) {
+            if(b[i][j] == KING_C)
+                kings_c++;
+            else if(b[i][j] == KING_P)
+                kings_p++;
+        }
+    }
+    if(kings_c == 0)
         return LOSE;
-    if (COMPUTER_KINGS == 0)
-        return LOSE;
+    if(kings_p == 0)
+        return WIN;
     return 0;
 }
 
@@ -419,14 +421,9 @@ void movePiece(Move *move, const bool undo) {
     char temp;
     if (undo) {
         // since current position is in destination, move it back
-            b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
+        b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
         // undo piece captured to original place
         b[move->move[2]][move->move[3]] = move->piece_captured;
-
-        if (move->piece_captured == KING_P)
-            PLAYER_KINGS++;
-        else if (move->piece_captured == KING_C)
-            COMPUTER_KINGS++;
 
         if(move->should_change){
             // change the current identity
@@ -440,11 +437,6 @@ void movePiece(Move *move, const bool undo) {
         b[move->move[0]][move->move[1]] = b[move->move[2]][move->move[3]];
         // store current piece in destination in case we want to undo
         b[move->move[2]][move->move[3]] = temp;
-
-        if (move->piece_captured == KING_P)
-            PLAYER_KINGS--;
-        else if (move->piece_captured == KING_C)
-            COMPUTER_KINGS--;
 
         // if we capture a piece make the position we left from empty
         if (move->capture)
