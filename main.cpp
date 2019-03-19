@@ -73,16 +73,16 @@ void playerTurn() {
 
     allocateMoves(moves);
 
-    PLAYER_MOVES_LEFT = generatePlayerMoves(moves);
-    if (PLAYER_MOVES_LEFT == 0)
+    int player_moves_left = generatePlayerMoves(moves);
+    if (player_moves_left == 0)
         gameOver(PLAYER, REASON_NO_MOVES_LEFT);
-    printMoves(moves, PLAYER_MOVES_LEFT);
+    printMoves(moves, player_moves_left);
 
     do {
         std::cout << "Enter move: ";
         if (std::cin >> input) {
             convertInput(player_move, input);
-            legal_move = isValidMove(moves, player_move);
+            legal_move = isValidMove(moves, player_moves_left, player_move);
 
             if (legal_move)
                 movePiece(player_move, DONT_UNDO);
@@ -140,9 +140,9 @@ void printComputerMove(const Move &move) {
               << ")" << std::endl;
 }
 
-bool isValidMove(Move **moves, Move *player_move) {
+bool isValidMove(Move **moves,const int move_count, Move *player_move) {
     bool legal_move = false;
-    for (int i = 0; i < PLAYER_MOVES_LEFT; i++) {
+    for (int i = 0; i < move_count; i++) {
         if (moves[i]->move[0] == player_move->move[0] &&
             moves[i]->move[1] == player_move->move[1] &&
             moves[i]->move[2] == player_move->move[2] &&
@@ -220,16 +220,16 @@ Move miniMax() {
     START_TIME = clock();
     allocateMoves(computer_moves);
 
-    COMPUTER_MOVES_LEFT = generateComputerMoves(computer_moves);
-    printMoves(computer_moves,COMPUTER_MOVES_LEFT);
-    if (COMPUTER_MOVES_LEFT == 0)
+    int computer_moves_left = generateComputerMoves(computer_moves);
+    printMoves(computer_moves,computer_moves_left);
+    if (computer_moves_left == 0)
         gameOver(COMPUTER, REASON_NO_MOVES_LEFT);
 
     while ((timeDiff(START_TIME)) < ALLOWED_TIME) {
         depth = 0; // reset depth for next max depth attempt
-        for (; i < COMPUTER_MOVES_LEFT; ++i) {
+        for (i = 0; i < computer_moves_left; ++i) { //TODO: if i remove i = 0; it plays amazing, but doesn't respect time limit
             movePiece(computer_moves[i], DONT_UNDO);
-            score = min(depth + 1, max_depth + d, MIN);
+            score = min(depth, max_depth + d, MIN);
             movePiece(computer_moves[i], UNDO);
             if (score > best_score) {
                 best_score = score;
@@ -239,8 +239,9 @@ Move miniMax() {
         if (score == TIMES_UP) *current_best_move = best_move; // if early store last best
         if (score == MAX) break; // stop searching if win
         d++; // increase the max depth
+        std::cout << "depth " << d << " score: " << best_score << "\n";
     }
-    std::cout << "dove down to depth " << max_depth + i << " that turn\n";
+    std::cout << "dove down to depth " << max_depth + d - 1 << " that turn\n";
     if (score == TIMES_UP)
         best_move = *current_best_move; // if we break out early we want to return to last depths best
     deallocateMoves(computer_moves);
@@ -255,18 +256,17 @@ int min(const int depth, const int max_depth, const int parent_best_score) {
     Move *moves[MAX_MOVES];
     allocateMoves(moves);
     int player_moves_count = generatePlayerMoves(moves);
+    if(player_moves_count == 0)
+        return WIN + depth;
 
     if (depth == max_depth)
         return evaluateMin(depth);
 
     int best_score = MAX, score;
-    int old_player_moves = PLAYER_MOVES_LEFT;
-    PLAYER_MOVES_LEFT = player_moves_count;
 
     for (int i = 0; i < player_moves_count; ++i) {
         if (timeDiff(START_TIME) >= ALLOWED_TIME) {
             deallocateMoves(moves);
-            PLAYER_MOVES_LEFT = old_player_moves;
             return TIMES_UP;
         }
         movePiece(moves[i], DONT_UNDO);
@@ -274,19 +274,16 @@ int min(const int depth, const int max_depth, const int parent_best_score) {
         movePiece(moves[i], UNDO);
         if (score == TIMES_UP) {
             deallocateMoves(moves);
-            PLAYER_MOVES_LEFT = old_player_moves;
             return TIMES_UP;
         }
         if (score < parent_best_score) {
             deallocateMoves(moves);
-            PLAYER_MOVES_LEFT = old_player_moves;
             return score;
         }
         if (score < best_score)
             best_score = score;
     }
     deallocateMoves(moves);
-    PLAYER_MOVES_LEFT = old_player_moves;
     return best_score;
 }
 
@@ -297,18 +294,16 @@ int max(const int depth, const int max_depth, const int parent_best_score) {
     Move *moves[MAX_MOVES];
     allocateMoves(moves);
     int computer_moves_count = generateComputerMoves(moves);
-
+    if(computer_moves_count == 0)
+        return LOSE - depth;
     if (depth == max_depth)
         return evaluateMax(depth);
 
     int best_score = MIN, score;
-    int old_computer_moves = COMPUTER_MOVES_LEFT;
-    COMPUTER_MOVES_LEFT = computer_moves_count;
 
     for (int i = 0; i < computer_moves_count; ++i) {
         if (timeDiff(START_TIME) >= ALLOWED_TIME) {
             deallocateMoves(moves);
-            COMPUTER_MOVES_LEFT = old_computer_moves;
             return TIMES_UP;
         }
         movePiece(moves[i], DONT_UNDO);
@@ -316,12 +311,10 @@ int max(const int depth, const int max_depth, const int parent_best_score) {
         movePiece(moves[i], UNDO);
         if (score == TIMES_UP) {
             deallocateMoves(moves);
-            COMPUTER_MOVES_LEFT = old_computer_moves;
             return TIMES_UP;
         }
         if (score > parent_best_score) {
             deallocateMoves(moves);
-            COMPUTER_MOVES_LEFT = old_computer_moves;
             return score;
         }
         if (score > best_score) {
@@ -329,7 +322,6 @@ int max(const int depth, const int max_depth, const int parent_best_score) {
         }
     }
     deallocateMoves(moves);
-    COMPUTER_MOVES_LEFT = old_computer_moves;
     return best_score;
 }
 

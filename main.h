@@ -40,9 +40,6 @@ const bool DONT_UNDO = false;
 const int REASON_NO_MOVES_LEFT = 0;
 const int REASON_NO_KINGS_LEFT = 1;
 
-int PLAYER_MOVES_LEFT = 1;
-int COMPUTER_MOVES_LEFT = 1;
-
 const int BOARD_ROWS = 6;
 const int BOARD_COLS = 8;
 
@@ -102,7 +99,7 @@ void gameOver(int player, int reason);
 
 void printMoves(Move **moves, int left);
 
-bool isValidMove(Move **moves, Move *player_move);
+bool isValidMove(Move **moves, int move_count, Move *player_move);
 
 void allocateMoves(Move *moves[50]);
 
