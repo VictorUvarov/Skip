@@ -124,9 +124,9 @@ int min(int depth, int max_depth, int parent_best_score);
 
 int max(int depth, int max_depth, int parent_best_score);
 
-int evaluateMin(Move **moves,int &move_count, int depth);
+int evaluateMin(int depth);
 
-int evaluateMax(Move **moves,int &move_count, int depth);
+int evaluateMax(int depth);
 
 int checkForWinner();
 

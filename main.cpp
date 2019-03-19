@@ -258,7 +258,7 @@ int min(const int depth, const int max_depth, const int parent_best_score) {
     int player_moves_count = generatePlayerMoves(moves);
 
     if (depth == max_depth)
-        return evaluateMin(moves,player_moves_count,depth);
+        return evaluateMin(depth);
 
     int best_score = MAX, score;
     int old_player_moves = PLAYER_MOVES_LEFT;
@@ -300,7 +300,7 @@ int max(const int depth, const int max_depth, const int parent_best_score) {
     int computer_moves_count = generateComputerMoves(moves);
 
     if (depth == max_depth)
-        return evaluateMax(moves,computer_moves_count,depth);
+        return evaluateMax(depth);
 
     int best_score = MIN, score;
     int old_computer_moves = COMPUTER_MOVES_LEFT;
@@ -334,48 +334,24 @@ int max(const int depth, const int max_depth, const int parent_best_score) {
     return best_score;
 }
 
-int evaluateMax(Move **moves,int &move_count, int depth){
-    int king_row[2], king_col[2];
-    int i, p = 0;
-    // find Players's king locations
-    for (i = 0; i < BOARD_ROWS; ++i) {
-        for (int j = 0; j < BOARD_COLS; ++j) {
-            if(b[i][j] == KING_P){
-                king_row[p] = i;
-                king_col[p] = j;
-                p++;
-            }
-        }
-    }
-
-    // find move 'to' location that matches computer king location
-    for (i = 0; i < move_count; ++i) {
-        if(moves[i]->move[2] == king_row[0] && moves[i]->move[3] == king_col[0]){
-            return WIN - depth;
-        }
-        if(moves[i]->move[2] == king_row[1] && moves[i]->move[3] == king_col[1]){
-            return WIN - depth;
-        }
-    }
-
-    // we didn't find a move that kills a king, so just evaluate pieces
-    int score = 0, pieces = 0;
+int evaluateMax(const int depth){
+    int score = 0, king_c = 0, king_p = 0;
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
-            if(islower(b[i][j]))
-                pieces--;
-            if(isupper(b[i][j]))
-                pieces++;
-            if (b[i][j] == KING_C)
-                score += 8;
+            if (b[i][j] == KING_C) {
+                score += 4;
+                king_c++;
+            }
             else if (b[i][j] == HORSE_C)
                 score += 3;
             else if (b[i][j] == BISHOP_C)
                 score += 2;
             else if (b[i][j] == PAWN_C)
                 score += 1;
-            else if (b[i][j] == KING_P)
-                score -= 8;
+            else if (b[i][j] == KING_P) {
+                score -= 4;
+                king_p++;
+            }
             else if (b[i][j] == HORSE_P)
                 score -= 3;
             else if (b[i][j] == BISHOP_P)
@@ -384,60 +360,45 @@ int evaluateMax(Move **moves,int &move_count, int depth){
                 score -= 1;
         }
     }
-    return score + pieces - depth;
+    if(king_c == 0)
+        return LOSE + depth;
+    if(king_p == 0)
+        return WIN - depth;
+    return score - depth;
 }
 
-int evaluateMin(Move **moves,int &move_count, int depth){
-    int king_row[2], king_col[2];
-    int i, p = 0;
-    // find computer's king locations
-    for (i = 0; i < BOARD_ROWS; ++i) {
-        for (int j = 0; j < BOARD_COLS; ++j) {
-            if(b[i][j] == KING_C){
-                king_row[p] = i;
-                king_col[p] = j;
-                p++;
-            }
-        }
-    }
-
-    // find move 'to' location that matches computer king locations
-    for (i = 0; i < move_count; ++i) {
-        if(moves[i]->move[2] == king_row[0] && moves[i]->move[3] == king_col[0]){
-            return LOSE + depth;
-        }
-        if(moves[i]->move[2] == king_row[1] && moves[i]->move[3] == king_col[1]){
-            return LOSE + depth;
-        }
-    }
-
-    // we didn't find a move that kills a king, so just evaluate pieces
-    int score = 0, pieces = 0;
+int evaluateMin(const int depth){
+    int score = 0, king_c = 0, king_p = 0;
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
-            if(islower(b[i][j]))
-                pieces--;
-            if(isupper(b[i][j]))
-                pieces++;
-            if (b[i][j] == KING_C)
-                score += 50;
+            if (b[i][j] == KING_C) {
+                score += 4;
+                king_c++;
+            }
             else if (b[i][j] == HORSE_C)
-                score += 25;
+                score += 3;
             else if (b[i][j] == BISHOP_C)
-                score += 20;
+                score += 2;
             else if (b[i][j] == PAWN_C)
                 score += 1;
-            else if (b[i][j] == KING_P)
-                score -= 50;
+            else if (b[i][j] == KING_P) {
+                score -= 4;
+                king_p++;
+            }
             else if (b[i][j] == HORSE_P)
-                score -= 25;
+                score -= 3;
             else if (b[i][j] == BISHOP_P)
-                score -= 20;
+                score -= 2;
             else if (b[i][j] == PAWN_P)
                 score -= 1;
         }
     }
-    return score + pieces + depth;
+    if(king_c == 0)
+        return LOSE + depth;
+    if(king_p == 0)
+        return WIN - depth;
+
+    return score + depth;
 }
 
 int checkForWinner() {
