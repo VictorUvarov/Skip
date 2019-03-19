@@ -216,7 +216,7 @@ Move miniMax() {
     Move *current_best_move = new Move();
     Move best_move = Move();
     int score = 0, i = 0, d = 0, depth = 0, max_depth = 1;
-    int best_score = MIN;
+    int best_score;
     START_TIME = clock();
     allocateMoves(computer_moves);
 
@@ -227,9 +227,10 @@ Move miniMax() {
 
     while ((timeDiff(START_TIME)) < ALLOWED_TIME) {
         depth = 0; // reset depth for next max depth attempt
+        best_score = MIN;
         for (i = 0; i < computer_moves_left; ++i) { //TODO: if i remove i = 0; it plays amazing, but doesn't respect time limit
             movePiece(computer_moves[i], DONT_UNDO);
-            score = min(depth, max_depth + d, MIN);
+            score = min(depth, max_depth + d, best_score);
             movePiece(computer_moves[i], UNDO);
             if (score > best_score) {
                 best_score = score;
