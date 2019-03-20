@@ -115,9 +115,9 @@ float timeDiff(clock_t begin_time);
 
 Move miniMax();
 
-int min(int depth, int max_depth, int parent_best_score);
+int min(int depth, int max_depth);
 
-int max(int depth, int max_depth, int parent_best_score);
+int max(int depth, int max_depth);
 
 int evaluateMin(int depth);
 
