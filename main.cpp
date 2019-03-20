@@ -252,8 +252,8 @@ int max(const int depth, const int max_depth, const int parents_best_score) {
     for (int i = 0; i < computer_moves_left; ++i) {
         movePiece(computer_moves[i], DONT_UNDO);
         score = min(depth + 1, max_depth, best_score);
-        if(score > best_score) best_score = score;
         movePiece(computer_moves[i], UNDO);
+        if(score > best_score) best_score = score;
         if(score > parents_best_score){ // prune
             deallocateMoves(computer_moves);
             return best_score;
@@ -277,8 +277,8 @@ int min(const int depth, const int max_depth, const int parents_best_score) {
     for (int i = 0; i < player_moves_left; ++i) {
         movePiece(player_moves[i], DONT_UNDO);
         score = max(depth + 1, max_depth, best_score);
-        if(score < best_score) best_score = score;
         movePiece(player_moves[i], UNDO);
+        if(score < best_score) best_score = score;
         if(score < parents_best_score){ // prune
             deallocateMoves(player_moves);
             return best_score;
