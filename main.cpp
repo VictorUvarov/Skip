@@ -227,7 +227,7 @@ Move miniMax() {
 
     for (int i = 0; i < computer_moves_left; ++i) {
         movePiece(computer_moves[i], DONT_UNDO);
-        score = min(depth + 1, max_depth);
+        score = min(depth + 1, max_depth, MIN);
         if (score > best_score) {
             best_score = score;
             best_move = *computer_moves[i];
@@ -240,7 +240,7 @@ Move miniMax() {
     return best_move;
 }
 
-int max(const int depth, const int max_depth) {
+int max(const int depth, const int max_depth, const int parents_best_score) {
     Move *computer_moves[MAX_MOVES];
     int best_score = MIN, score;
     if (checkForWinner() != -1) return checkForWinner();
@@ -251,9 +251,13 @@ int max(const int depth, const int max_depth) {
     int computer_moves_left = generateComputerMoves(computer_moves);
     for (int i = 0; i < computer_moves_left; ++i) {
         movePiece(computer_moves[i], DONT_UNDO);
-        score = min(depth + 1, max_depth);
+        score = min(depth + 1, max_depth, best_score);
         if(score > best_score) best_score = score;
         movePiece(computer_moves[i], UNDO);
+        if(score > parents_best_score){ // prune
+            deallocateMoves(computer_moves);
+            return best_score;
+        }
     }
 
     deallocateMoves(computer_moves);
@@ -261,7 +265,7 @@ int max(const int depth, const int max_depth) {
     return best_score;
 }
 
-int min(const int depth, const int max_depth) {
+int min(const int depth, const int max_depth, const int parents_best_score) {
     Move *player_moves[MAX_MOVES];
     int best_score = MAX, score;
     if (checkForWinner() != -1) return checkForWinner();
@@ -272,9 +276,13 @@ int min(const int depth, const int max_depth) {
     int player_moves_left = generatePlayerMoves(player_moves);
     for (int i = 0; i < player_moves_left; ++i) {
         movePiece(player_moves[i], DONT_UNDO);
-        score = max(depth + 1, max_depth);
+        score = max(depth + 1, max_depth, best_score);
         if(score < best_score) best_score = score;
         movePiece(player_moves[i], UNDO);
+        if(score < parents_best_score){ // prune
+            deallocateMoves(player_moves);
+            return best_score;
+        }
     }
 
     deallocateMoves(player_moves);
