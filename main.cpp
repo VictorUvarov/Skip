@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include "main.h"
 
 int main() {
@@ -220,7 +219,7 @@ Move miniMax() {
 
     int computer_moves_left = generateComputerMoves(computer_moves);
     Move best_move = *computer_moves[0]; //make sure at least one valid move
-    Move *prev_best_move = &best_move; //make sure at least one valid move
+
     printMoves(computer_moves, computer_moves_left);
 
     if (computer_moves_left == 0)
@@ -240,10 +239,9 @@ Move miniMax() {
             movePiece(computer_moves[i], UNDO);
             if(score == TIMES_UP) break;
         }
-        if(score == TIMES_UP) *prev_best_move = best_move; // if early store last best
+        std::cout << "best_score at depth [" << max_depth - 1 << "] = " << best_score << std::endl;
         max_depth++;
     }
-    if(score == TIMES_UP) best_move = *prev_best_move;
 
     deallocateMoves(computer_moves);
     return best_move;
@@ -279,12 +277,14 @@ int max(const int depth, const int max_depth, const int parents_best_score) {
 
     deallocateMoves(computer_moves);
 
+    //std::cout << "best_score at depth [" << depth << "] = " << best_score << std::endl;
     return best_score;
 }
 
 int min(const int depth, const int max_depth, const int parents_best_score) {
     Move *player_moves[MAX_MOVES];
     int best_score = MAX, score;
+
     if (checkForWinner() != -1) return checkForWinner();
     if (depth == max_depth) return evaluateMin(depth);
 
@@ -312,6 +312,7 @@ int min(const int depth, const int max_depth, const int parents_best_score) {
 
     deallocateMoves(player_moves);
 
+    //std::cout << "best_score at depth [" << depth << "] = " << best_score << std::endl;
     return best_score;
 }
 
@@ -320,21 +321,21 @@ int evaluateMax(const int depth) {
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
             if (b[i][j] == KING_C)
-                score += 4;
+                score += KING_EVAL;
             else if (b[i][j] == HORSE_C)
-                score += 3;
+                score += HORSE_EVAL;
             else if (b[i][j] == BISHOP_C)
-                score += 2;
+                score += BISHOP_EVAL;
             else if (b[i][j] == PAWN_C)
-                score += 1;
+                score += PAWN_EVAL;
             else if (b[i][j] == KING_P)
-                score -= 4;
+                score -= KING_EVAL;
             else if (b[i][j] == HORSE_P)
-                score -= 3;
+                score -= HORSE_EVAL;
             else if (b[i][j] == BISHOP_P)
-                score -= 2;
+                score -= BISHOP_EVAL;
             else if (b[i][j] == PAWN_P)
-                score -= 1;
+                score -= PAWN_EVAL;
         }
     }
     return score - depth;
@@ -345,21 +346,21 @@ int evaluateMin(const int depth) {
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
             if (b[i][j] == KING_C)
-                score += 4;
+                score += KING_EVAL;
             else if (b[i][j] == HORSE_C)
-                score += 3;
+                score += HORSE_EVAL;
             else if (b[i][j] == BISHOP_C)
-                score += 2;
+                score += BISHOP_EVAL;
             else if (b[i][j] == PAWN_C)
-                score += 1;
+                score += PAWN_EVAL;
             else if (b[i][j] == KING_P)
-                score -= 4;
+                score -= KING_EVAL;
             else if (b[i][j] == HORSE_P)
-                score -= 3;
+                score -= HORSE_EVAL;
             else if (b[i][j] == BISHOP_P)
-                score -= 2;
+                score -= BISHOP_EVAL;
             else if (b[i][j] == PAWN_P)
-                score -= 1;
+                score -= PAWN_EVAL;
         }
     }
 

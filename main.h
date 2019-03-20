@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include <string>
 #include <iostream>
 #include <ctime>
 
@@ -30,41 +29,46 @@
 #define ROW_ONE 5
 #define ALLOWED_TIME 5
 
-const int COMPUTER = 2;
-const int PLAYER = 1;
-const int MAX_MOVES = 50;
+#define KING_EVAL 6
+#define BISHOP_EVAL 3
+#define HORSE_EVAL 3
+#define PAWN_EVAL 1
 
-const bool UNDO = true;
-const bool DONT_UNDO = false;
+static const int COMPUTER = 2;
+static const int PLAYER = 1;
+static const int MAX_MOVES = 50;
 
-const int REASON_NO_MOVES_LEFT = 0;
-const int REASON_NO_KINGS_LEFT = 1;
+static const bool UNDO = true;
+static const bool DONT_UNDO = false;
 
-const int BOARD_ROWS = 6;
-const int BOARD_COLS = 8;
+static  int REASON_NO_MOVES_LEFT = 0;
+static const int REASON_NO_KINGS_LEFT = 1;
+
+static const int BOARD_ROWS = 6;
+static const int BOARD_COLS = 8;
 
 char b[BOARD_ROWS][BOARD_COLS];
 
-const char KING_C = 'K';
-const char HORSE_C = 'H';
-const char BISHOP_C = 'B';
-const char PAWN_C = 'P';
+static const char KING_C = 'K';
+static const char HORSE_C = 'H';
+static const char BISHOP_C = 'B';
+static const char PAWN_C = 'P';
 
-const char KING_P = 'k';
-const char HORSE_P = 'h';
-const char BISHOP_P = 'b';
-const char PAWN_P = 'p';
+static const char KING_P = 'k';
+static const char HORSE_P = 'h';
+static const char BISHOP_P = 'b';
+static const char PAWN_P = 'p';
 
-const char* KING_UNI_C = "\u265A";
-const char* HORSE_UNI_C = "\u265E";
-const char* BISHOP_UNI_C = "\u265D";
-const char* PAWN_UNI_C = "\u265F";
+static const char* KING_UNI_C = "\u265A";
+static const char* HORSE_UNI_C = "\u265E";
+static const char* BISHOP_UNI_C = "\u265D";
+static const char* PAWN_UNI_C = "\u265F";
 
-const char* KING_UNI_P = "\u2654";
-const char* HORSE_UNI_P = "\u2658";
-const char* BISHOP_UNI_P = "\u2657";
-const char* PAWN_UNI_P = "\u2659";
-const char* DOT = "\u00B7";
+static const char* KING_UNI_P = "\u2654";
+static const char* HORSE_UNI_P = "\u2658";
+static const char* BISHOP_UNI_P = "\u2657";
+static const char* PAWN_UNI_P = "\u2659";
+static const char* DOT = "\u00B7";
 
 bool IS_PLAYER_TURN = false;
 bool IS_COMPUTER_TURN = false;
