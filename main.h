@@ -11,7 +11,7 @@
 #define LOSE -500000
 #define MAX 2000000
 #define MIN -2000000
-#define TIMES_UP 111111
+#define TIMES_UP 12345
 
 #define A 0
 #define B 1

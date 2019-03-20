@@ -214,29 +214,38 @@ void allocateMoves(Move *moves[50]) {
 Move miniMax() {
     Move *computer_moves[MAX_MOVES];
     int best_score = MIN;
-    int score, depth = 0, max_depth = 5;
+    int score = 0, depth = 0, max_depth = 2;
 
     allocateMoves(computer_moves);
 
     int computer_moves_left = generateComputerMoves(computer_moves);
     Move best_move = *computer_moves[0]; //make sure at least one valid move
+    Move *prev_best_move = &best_move; //make sure at least one valid move
     printMoves(computer_moves, computer_moves_left);
 
     if (computer_moves_left == 0)
         gameOver(COMPUTER, REASON_NO_MOVES_LEFT);
 
-    for (int i = 0; i < computer_moves_left; ++i) {
-        movePiece(computer_moves[i], DONT_UNDO);
-        score = min(depth + 1, max_depth, MIN);
-        if (score > best_score) {
-            best_score = score;
-            best_move = *computer_moves[i];
+    START_TIME = clock();
+
+    while(timeDiff(START_TIME) < ALLOWED_TIME){
+        depth = 0;
+        for (int i = 0; i < computer_moves_left; ++i) {
+            movePiece(computer_moves[i], DONT_UNDO);
+            score = min(depth + 1, max_depth, MIN);
+            if (score > best_score && score != TIMES_UP) {
+                best_score = score;
+                best_move = *computer_moves[i];
+            }
+            movePiece(computer_moves[i], UNDO);
+            if(score == TIMES_UP) break;
         }
-        movePiece(computer_moves[i], UNDO);
+        if(score == TIMES_UP) *prev_best_move = best_move; // if early store last best
+        max_depth++;
     }
+    if(score == TIMES_UP) best_move = *prev_best_move;
 
     deallocateMoves(computer_moves);
-
     return best_move;
 }
 
@@ -250,9 +259,17 @@ int max(const int depth, const int max_depth, const int parents_best_score) {
 
     int computer_moves_left = generateComputerMoves(computer_moves);
     for (int i = 0; i < computer_moves_left; ++i) {
+        if(timeDiff(START_TIME) >= ALLOWED_TIME){ // find out time is up
+            deallocateMoves(computer_moves);
+            return TIMES_UP;
+        }
         movePiece(computer_moves[i], DONT_UNDO);
         score = min(depth + 1, max_depth, best_score);
         movePiece(computer_moves[i], UNDO);
+        if(score == TIMES_UP){ // find out times up from child node
+            deallocateMoves(computer_moves);
+            return TIMES_UP;
+        }
         if(score > best_score) best_score = score;
         if(score > parents_best_score){ // prune
             deallocateMoves(computer_moves);
@@ -275,9 +292,17 @@ int min(const int depth, const int max_depth, const int parents_best_score) {
 
     int player_moves_left = generatePlayerMoves(player_moves);
     for (int i = 0; i < player_moves_left; ++i) {
+        if(timeDiff(START_TIME) >= ALLOWED_TIME){ // find out time is up
+            deallocateMoves(player_moves);
+            return TIMES_UP;
+        }
         movePiece(player_moves[i], DONT_UNDO);
         score = max(depth + 1, max_depth, best_score);
         movePiece(player_moves[i], UNDO);
+        if(score == TIMES_UP){ // find out times up from child node
+            deallocateMoves(player_moves);
+            return TIMES_UP;
+        }
         if(score < best_score) best_score = score;
         if(score < parents_best_score){ // prune
             deallocateMoves(player_moves);
