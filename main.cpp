@@ -213,13 +213,13 @@ void allocateMoves(Move *moves[50]) {
 
 Move miniMax() {
     Move *computer_moves[MAX_MOVES];
-    Move best_move = Move();
     int best_score = MIN;
     int score, depth = 0, max_depth = 5;
 
     allocateMoves(computer_moves);
 
     int computer_moves_left = generateComputerMoves(computer_moves);
+    Move best_move = *computer_moves[0]; //make sure at least one valid move
     printMoves(computer_moves, computer_moves_left);
 
     if (computer_moves_left == 0)
