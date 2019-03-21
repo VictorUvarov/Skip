@@ -1,3 +1,5 @@
+//Name: Victor Uvarov
+//Program: Skip
 #include "main.h"
 
 int main() {
