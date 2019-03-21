@@ -11,6 +11,7 @@
 #define MAX 2000000
 #define MIN -2000000
 #define TIMES_UP 12345
+#define MAX_DEPTH 99
 
 #define A 0
 #define B 1
