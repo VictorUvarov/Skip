@@ -227,7 +227,7 @@ Move miniMax() {
 
     START_TIME = clock();
 
-    while(timeDiff(START_TIME) < ALLOWED_TIME && max_depth < MAX_DEPTH){
+    while(timeDiff(START_TIME) < ALLOWED_TIME && max_depth < MAX_DEPTH) {
         depth = 0;
         for (int i = 0; i < computer_moves_left; ++i) {
             movePiece(computer_moves[i], DONT_UNDO);
@@ -237,11 +237,10 @@ Move miniMax() {
                 best_move = *computer_moves[i];
             }
             movePiece(computer_moves[i], UNDO);
-            if(score == TIMES_UP) break;
-            if(score == WIN) break;
+            if (score == TIMES_UP) break;
         }
-        std::cout << "best_score at depth [" << max_depth - 1 << "] = " << best_score << std::endl;
-        if(score == WIN) break;
+        std::cout << "best_score at depth [" << max_depth - 1 << "] = " << best_score;
+        std::cout << " Time = " << timeDiff(START_TIME) << " seconds." << std::endl;
         max_depth++;
     }
 
@@ -282,7 +281,6 @@ int max(const int depth, const int max_depth, const int parents_best_score) {
 
     deallocateMoves(computer_moves);
 
-    //std::cout << "best_score at depth [" << depth << "] = " << best_score << std::endl;
     return best_score;
 }
 
@@ -319,8 +317,7 @@ int min(const int depth, const int max_depth, const int parents_best_score) {
     }
 
     deallocateMoves(player_moves);
-
-    //std::cout << "best_score at depth [" << depth << "] = " << best_score << std::endl;
+    
     return best_score;
 }
 
