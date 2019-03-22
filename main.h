@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <iostream>
 #include <ctime>
+#include <algorithm>
 
 #define WIN 500000
 #define LOSE -500000
@@ -115,6 +116,8 @@ void convertInput(Move *player_move, const char *input);
 void printComputerMove(const Move &move);
 
 float timeDiff(clock_t begin_time);
+
+bool sortCapture(Move *m1, Move *m2);
 
 // Mini max
 

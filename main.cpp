@@ -177,6 +177,36 @@ void printMoves(Move **moves, const int size) {
 
 float timeDiff(const clock_t begin_time) { return float(clock() - begin_time) / CLOCKS_PER_SEC; }
 
+bool sortCapture(Move *m1, Move *m2){
+    // Since true = 1 and false = 0
+    // capture being true > false so prioritize captures
+    return m1->capture > m2->capture;
+}
+
+bool sortEval(Move *m1, Move *m2){
+    int m1_eval = 0, m2_eval = 0;
+
+    if(m1->piece_captured == PAWN_C || m1->piece_captured == PAWN_P)
+        m1_eval+=PAWN_EVAL;
+    else if(m1->piece_captured == BISHOP_C || m1->piece_captured == BISHOP_P)
+        m1_eval+=BISHOP_EVAL;
+    else if(m1->piece_captured == HORSE_C || m1->piece_captured == HORSE_P)
+        m1_eval+=HORSE_EVAL;
+    else if(m1->piece_captured == KING_C || m1->piece_captured == KING_P)
+        m1_eval+=KING_EVAL;
+
+    if(m2->piece_captured == PAWN_C || m2->piece_captured == PAWN_P)
+        m2_eval+=PAWN_EVAL;
+    else if(m2->piece_captured == BISHOP_C || m2->piece_captured == BISHOP_P)
+        m2_eval+=BISHOP_EVAL;
+    else if(m2->piece_captured == HORSE_C || m2->piece_captured == HORSE_P)
+        m2_eval+=HORSE_EVAL;
+    else if(m2->piece_captured == KING_C || m2->piece_captured == KING_P)
+        m2_eval+=KING_EVAL;
+
+    return m1_eval > m2_eval;
+}
+
 void gameOver(const int player, const int reason) {
     if (player == PLAYER) {
         if (reason == REASON_NO_KINGS_LEFT) {
@@ -229,6 +259,9 @@ Move miniMax() {
 
     START_TIME = clock();
 
+    std::sort(computer_moves, computer_moves + computer_moves_left, sortCapture);
+    std::sort(computer_moves, computer_moves + computer_moves_left, sortEval);
+
     while(timeDiff(START_TIME) < ALLOWED_TIME && max_depth < MAX_DEPTH) {
         depth = 0;
         for (int i = 0; i < computer_moves_left; ++i) {
@@ -261,6 +294,9 @@ int max(const int depth, const int max_depth, const int parents_best_score) {
     int computer_moves_left = generateComputerMoves(computer_moves);
     if(computer_moves_left == 0)
         return LOSE - depth;
+
+    std::sort(computer_moves, computer_moves + computer_moves_left, sortCapture);
+    std::sort(computer_moves, computer_moves + computer_moves_left, sortEval);
 
     for (int i = 0; i < computer_moves_left; ++i) {
         if(timeDiff(START_TIME) >= ALLOWED_TIME){ // find out time is up
@@ -298,6 +334,9 @@ int min(const int depth, const int max_depth, const int parents_best_score) {
     int player_moves_left = generatePlayerMoves(player_moves);
     if(player_moves_left == 0)
         return WIN + depth;
+
+    std::sort(player_moves, player_moves + player_moves_left, sortCapture);
+    std::sort(player_moves, player_moves + player_moves_left, sortEval);
 
     for (int i = 0; i < player_moves_left; ++i) {
         if(timeDiff(START_TIME) >= ALLOWED_TIME){ // find out time is up
