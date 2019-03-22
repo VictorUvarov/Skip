@@ -38,7 +38,7 @@
 
 static const int COMPUTER = 2;
 static const int PLAYER = 1;
-static const int MAX_MOVES = 50;
+static const int MAX_MOVES = 56;
 
 static const bool UNDO = true;
 static const bool DONT_UNDO = false;
