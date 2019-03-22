@@ -31,7 +31,7 @@
 #define ROW_ONE 5
 #define ALLOWED_TIME 5
 
-#define KING_EVAL 6
+#define KING_EVAL 10
 #define BISHOP_EVAL 3
 #define HORSE_EVAL 3
 #define PAWN_EVAL 1
