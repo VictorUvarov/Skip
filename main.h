@@ -31,7 +31,7 @@
 #define ROW_ONE 5
 #define ALLOWED_TIME 5
 
-#define KING_EVAL 10
+#define KING_EVAL 0
 #define BISHOP_EVAL 3
 #define HORSE_EVAL 3
 #define PAWN_EVAL 1
@@ -127,9 +127,7 @@ int min(int depth, int max_depth, int parents_best_score);
 
 int max(int depth, int max_depth, int parents_best_score);
 
-int evaluateMin(int depth);
-
-int evaluateMax(int depth);
+int evaluate();
 
 int checkForWinner();
 

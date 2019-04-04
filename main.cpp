@@ -287,7 +287,7 @@ int max(const int depth, const int max_depth, const int parents_best_score) {
     Move *computer_moves[MAX_MOVES];
     int best_score = MIN, score;
     if (checkForWinner() != -1) return checkForWinner();
-    if (depth == max_depth) return evaluateMax(depth);
+    if (depth == max_depth) return evaluate();
 
     allocateMoves(computer_moves);
 
@@ -327,7 +327,7 @@ int min(const int depth, const int max_depth, const int parents_best_score) {
     int best_score = MAX, score;
 
     if (checkForWinner() != -1) return checkForWinner();
-    if (depth == max_depth) return evaluateMin(depth);
+    if (depth == max_depth) return evaluate();
 
     allocateMoves(player_moves);
 
@@ -362,7 +362,7 @@ int min(const int depth, const int max_depth, const int parents_best_score) {
     return best_score;
 }
 
-int evaluateMax(const int depth) {
+int evaluate() {
     int score = 0;
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
@@ -384,33 +384,7 @@ int evaluateMax(const int depth) {
                 score -= PAWN_EVAL;
         }
     }
-    return score - depth;
-}
-
-int evaluateMin(const int depth) {
-    int score = 0;
-    for (int i = 0; i < BOARD_ROWS; i++) {
-        for (int j = 0; j < BOARD_COLS; j++) {
-            if (b[i][j] == KING_C)
-                score += KING_EVAL;
-            else if (b[i][j] == HORSE_C)
-                score += HORSE_EVAL;
-            else if (b[i][j] == BISHOP_C)
-                score += BISHOP_EVAL;
-            else if (b[i][j] == PAWN_C)
-                score += PAWN_EVAL;
-            else if (b[i][j] == KING_P)
-                score -= KING_EVAL;
-            else if (b[i][j] == HORSE_P)
-                score -= HORSE_EVAL;
-            else if (b[i][j] == BISHOP_P)
-                score -= BISHOP_EVAL;
-            else if (b[i][j] == PAWN_P)
-                score -= PAWN_EVAL;
-        }
-    }
-
-    return score + depth;
+    return score;
 }
 
 int checkForWinner() {
